@@ -39,3 +39,10 @@ fastlane/test_output
 
 # Archives
 *.xcarchive
+
+# Profiling data
+*.profraw
+*.profdata
+
+# Claude local settings
+.claude/settings.local.json

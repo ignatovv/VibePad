@@ -13,6 +13,25 @@ struct VibePadApp: App {
 
     var body: some Scene {
         MenuBarExtra("VibePad", systemImage: "gamecontroller.fill") {
+            if let name = appDelegate.controllerName {
+                Text(name)
+            } else {
+                Text("No controller")
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            Toggle("Enabled", isOn: Bindable(appDelegate).isEnabled)
+
+            if !appDelegate.isAccessibilityGranted {
+                Button("Grant Accessibility Access...") {
+                    AccessibilityHelper.checkAndPrompt()
+                }
+            }
+
+            Divider()
+
             Button("Quit VibePad") {
                 NSApplication.shared.terminate(nil)
             }
