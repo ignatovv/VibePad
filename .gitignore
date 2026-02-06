@@ -14,6 +14,9 @@ DerivedData/
 # Private docs (launch strategy, marketing)
 .claude/private/
 
+# Claude hook logs
+.claude/logs/
+
 # Swift Package Manager
 .build/
 .swiftpm/
