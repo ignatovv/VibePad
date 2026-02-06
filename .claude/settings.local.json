@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)",
+      "Bash(git log:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git stash show:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(sed:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(od:*)",
+      "Bash(awk:*)",
+
+      "Bash(xcodebuild:*)",
+      "Bash(open:*)",
+      "Bash(make:*)",
+      "Bash(true)",
+
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue view:*)"
+    ],
+    "deny": []
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
+}
