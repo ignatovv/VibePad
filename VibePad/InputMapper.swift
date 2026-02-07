@@ -151,6 +151,10 @@ final class InputMapper {
     private var scrollLeftActive = false
     private var scrollRightActive = false
 
+    // L1+right stick app switching (single-fire per deflection)
+    private var l1RightStickLeftActive = false
+    private var l1RightStickRightActive = false
+
     // MARK: - Init
 
     init(emitter: KeyboardEmitter) {
@@ -370,9 +374,18 @@ final class InputMapper {
         }
     }
 
-    // MARK: - Right stick → scroll
+    // MARK: - Right stick → scroll (or L1+right stick → app switching)
 
     func handleRightStick(x: Float, y: Float) {
+        if isL1Held {
+            handleL1RightStick(x: x)
+            return
+        }
+
+        // Reset L1+right stick state when not in L1 layer
+        l1RightStickLeftActive = false
+        l1RightStickRightActive = false
+
         let dx = Int32(x * scrollSensitivity)
         let dy = Int32(y * scrollSensitivity)
 
@@ -405,6 +418,28 @@ final class InputMapper {
 
         if dx != 0 || dy != 0 {
             emitter.postScroll(deltaX: dx, deltaY: dy)
+        }
+    }
+
+    private func handleL1RightStick(x: Float) {
+        // Right → next app (Cmd+Tab)
+        if !l1RightStickRightActive && x > arrowPressThreshold {
+            l1RightStickRightActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"])
+            onAction?(nil, action, "Next App")
+            fireAction(action)
+        } else if l1RightStickRightActive && x < arrowReleaseThreshold {
+            l1RightStickRightActive = false
+        }
+
+        // Left → prev app (Cmd+Shift+Tab)
+        if !l1RightStickLeftActive && x < -arrowPressThreshold {
+            l1RightStickLeftActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"])
+            onAction?(nil, action, "Prev App")
+            fireAction(action)
+        } else if l1RightStickLeftActive && x > -arrowReleaseThreshold {
+            l1RightStickLeftActive = false
         }
     }
 }
