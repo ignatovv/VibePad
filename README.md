@@ -6,11 +6,18 @@ A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts 
 
 ## Features
 
-- Native PS5/Xbox controller support via Apple's GameController framework
-- Optimized default mappings for Cursor, VS Code, and terminal
-- JSON-based configuration at `~/.vibepad/config.json`
-- Visual HUD overlay showing button actions
-- Menu bar controls with enable/disable toggle
+- **Smart Paste** — clipboard-aware: sends Ctrl+V for images (Claude Code terminal), Cmd+V for text
+- **Two-layer mapping** — default layer + L1 modifier layer doubles your button count
+- **Sticky modifiers** — L1+D-pad app switching holds Cmd across multiple presses, releases on L1 up
+- **Left stick → arrow keys** — with hysteresis thresholds and hold-to-repeat
+- **Right stick → scroll** — continuous smooth scrolling in any direction
+- **L1+right stick → app switch** — flick right for next app, left for previous
+- **Hold-to-repeat** — configurable per-button repeat delay and interval
+- **Trigger modes** — fire on press, release, or both (e.g. hold-to-talk for voice input)
+- **HUD overlay** — learning mode shows action labels on every button press
+- **Menu bar app** — status icon, enable/disable toggle, launch at login
+- **JSON config** — full customization of mappings, descriptions, stick tuning at `~/.vibepad/config.json`
+- **Native controller support** — PS5 DualSense, Xbox, and MFi via GameController framework
 
 ## Button Mapping
 
@@ -54,6 +61,7 @@ VibePad writes its default config to `~/.vibepad/config.json` on first launch. E
 
 - **`keystroke`** — press a key with optional modifiers. `key` is any key name from the [key list](#available-keys), `modifiers` is an array of `"command"`, `"control"`, `"shift"`, `"option"`.
 - **`typeText`** — type a string character by character. Use `\n` for Enter.
+- **`smartPaste`** — clipboard-aware paste: sends Ctrl+V when the clipboard contains an image, Cmd+V otherwise. No `key` or `modifiers` needed.
 
 ### Available buttons
 
