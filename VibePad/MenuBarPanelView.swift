@@ -19,14 +19,16 @@ struct MenuBarPanelView: View {
             VStack(spacing: 0) {
                 ActionRow(
                     icon: appDelegate.isHUDEnabled ? "checkmark.square" : "square",
-                    iconColor: appDelegate.isHUDEnabled ? .primary : .secondary,
                     label: "Learning Mode (hints)"
                 ) {
                     appDelegate.isHUDEnabled.toggle()
                 }
 
                 if !appDelegate.launchAtLoginOnStartup {
-                    CheckmarkRow(label: "Launch at Login", isOn: appDelegate.launchAtLogin) {
+                    ActionRow(
+                        icon: appDelegate.launchAtLogin ? "sunrise.fill" : "sunrise",
+                        label: "Launch at Login"
+                    ) {
                         appDelegate.setLaunchAtLogin(!appDelegate.launchAtLogin)
                     }
                 }
@@ -157,37 +159,3 @@ private struct HeaderRow: View {
     }
 }
 
-// MARK: - Checkmark Row
-
-private struct CheckmarkRow: View {
-    let label: String
-    let isOn: Bool
-    let action: () -> Void
-
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .frame(width: 20)
-                    .opacity(isOn ? 1 : 0)
-                Text(label)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
-            .contentShape(Rectangle())
-            .background(
-                Rectangle()
-                    .fill(isHovering ? Color.primary.opacity(0.1) : .clear)
-            )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering in
-            isHovering = hovering
-        }
-    }
-}
