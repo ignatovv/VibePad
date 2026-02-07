@@ -114,6 +114,8 @@ final class OverlayHUD {
             return allMods + keyName
         case .typeText(let text):
             return text
+        case .smartPaste:
+            return "⌘V"
         }
     }
 }

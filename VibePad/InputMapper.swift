@@ -3,6 +3,7 @@
 //  VibePad
 //
 
+import AppKit
 import CoreGraphics
 import Foundation
 
@@ -10,6 +11,7 @@ enum MappedAction: Equatable {
     case keystroke(key: String, modifiers: [String])
     case stickyKeystroke(key: String, modifiers: [String], stickyModifiers: [String])
     case typeText(String)
+    case smartPaste
 }
 
 enum TriggerMode: String, Codable, Sendable {
@@ -36,7 +38,7 @@ final class InputMapper {
         .buttonA:              .keystroke(key: "return", modifiers: []),                // ✕ Accept/confirm (Enter)
         .buttonB:              .keystroke(key: "escape", modifiers: []),               // ○ Cancel/back (Escape)
         .buttonX:              .keystroke(key: "c", modifiers: ["control"]),           // □ Ctrl+C interrupt
-        .buttonY:              .keystroke(key: "v", modifiers: ["command"]),           // △ ⌘V paste
+        .buttonY:              .smartPaste,                                            // △ Smart paste (Ctrl+V for images, ⌘V for text)
         .dpadUp:               .keystroke(key: "upArrow", modifiers: []),              // Command history
         .dpadDown:             .keystroke(key: "downArrow", modifiers: []),            // Command history
         .dpadLeft:             .keystroke(key: "leftBracket", modifiers: ["command", "shift"]),  // Prev tab
@@ -53,19 +55,17 @@ final class InputMapper {
     // MARK: - L1 layer mappings
 
     static let l1Mappings: [GamepadButton: MappedAction] = [
+        .buttonY:              .keystroke(key: "c", modifiers: ["command"]),               // L1+△ ⌘C Copy
         .buttonB:              .keystroke(key: "delete", modifiers: []),                  // L1+○ Delete
         .dpadLeft:             .stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"]),  // L1+← Prev app
         .dpadRight:            .stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"]),               // L1+→ Next app
-        .dpadUp:               .keystroke(key: "upArrow", modifiers: ["control"]),        // L1+↑ Mission Control
-        .dpadDown:             .keystroke(key: "downArrow", modifiers: ["control"]),      // L1+↓ App Exposé
     ]
 
     static let l1Descriptions: [GamepadButton: String] = [
+        .buttonY:       "Copy",
         .buttonB:       "Delete",
         .dpadLeft:      "Prev App",
         .dpadRight:     "Next App",
-        .dpadUp:        "Mission Control",
-        .dpadDown:      "App Windows",
     ]
 
     // MARK: - Default repeat configs
@@ -276,6 +276,15 @@ final class InputMapper {
             emitter.postKeystroke(key: key, modifiers: modifiers + stickyModifiers)
         case .typeText(let text):
             emitter.typeText(text)
+        case .smartPaste:
+            let pb = NSPasteboard.general
+            let imageTypes: [NSPasteboard.PasteboardType] = [.png, .tiff]
+            let hasImage = pb.types?.contains(where: { imageTypes.contains($0) }) ?? false
+            if hasImage {
+                emitter.postKeystroke(key: "v", modifiers: ["control"])
+            } else {
+                emitter.postKeystroke(key: "v", modifiers: ["command"])
+            }
         }
     }
 

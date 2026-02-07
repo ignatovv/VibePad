@@ -130,6 +130,10 @@ extension ActionConfig {
                       repeats: repeatConfig != nil ? true : nil,
                       repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
                       trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
+        case .smartPaste:
+            self.init(type: "smartPaste", key: nil, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
+                      repeats: nil, repeatDelay: nil, repeatInterval: nil,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         }
     }
 
@@ -153,6 +157,8 @@ extension ActionConfig {
                 return nil
             }
             return .typeText(text)
+        case "smartPaste":
+            return .smartPaste
         default:
             print("[VibePad] Config: unknown action type \"\(type)\"")
             return nil
