@@ -70,7 +70,12 @@ final class InputMapper {
 
     // MARK: - Default repeat configs
 
-    static let defaultRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [:]
+    static let defaultRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [
+        .dpadUp:    (buttonRepeatDelay, buttonRepeatInterval),
+        .dpadDown:  (buttonRepeatDelay, buttonRepeatInterval),
+        .dpadLeft:  (buttonRepeatDelay, buttonRepeatInterval),
+        .dpadRight: (buttonRepeatDelay, buttonRepeatInterval),
+    ]
 
     static let l1RepeatDefaults: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [
         .buttonB: (buttonRepeatDelay, buttonRepeatInterval),  // L1+Circle Delete repeats
