@@ -68,7 +68,7 @@ Ship ONE opinionated preset optimized for Cursor/VS Code + terminal:
 | **D-pad Right** | Next Tab | `Cmd+Shift+]` | Switch tabs |
 | **L1** | Switch Panel | `` Cmd+` `` | Toggle terminal/editor |
 | **R1** | *Unassigned* | — | Reserved for future use |
-| **L2 (hold)** | Voice Trigger | User-configured shortcut | Activate voice-to-text |
+| **L2 (hold)** | Voice Trigger | User-configured shortcut | Trigger external voice-to-text app (Superwhisper, macOS Dictation, etc.) |
 | **R2** | Run/Execute | `Cmd+Enter` | Run in terminal / accept |
 | **Left Stick** | Arrow Keys | `↑↓←→` | Cursor movement |
 | **Right Stick** | Scroll | Scroll events | Scroll viewport |
@@ -126,6 +126,9 @@ Located at `~/.vibepad/config.json`. Created with defaults on first launch.
     "rightThumbstickButton": { "type": "keystroke", "key": "grave", "modifiers": ["control"] },
     "buttonMenu": { "type": "keystroke", "key": "g", "modifiers": ["command", "shift"] },
     "buttonOptions": { "type": "keystroke", "key": "period", "modifiers": ["command"] }
+  },
+  "l1Mappings": {
+    "buttonB": { "type": "keystroke", "key": "delete", "description": "Delete", "repeats": true, "repeatDelay": 0.3, "repeatInterval": 0.05 }
   },
   "stickConfig": {
     "leftStick": { "type": "arrowKeys", "deadzone": 0.3 },
@@ -197,6 +200,20 @@ CGEvent injection requires Accessibility permission. The app must:
 - Triggers are analog (0.0–1.0)
 - Treat as button press when value > 0.5
 - L2 "hold for voice" = fire shortcut on press, nothing on release
+- L2 default: `Option+Space` (matches Superwhisper default hotkey)
+- First-launch setup wizard asks user to set their voice-to-text shortcut and recommends tools if they don't have one
+
+### Button Repeat (Hold-to-Repeat)
+
+Any button mapping can opt into hold-to-repeat behavior via three config fields:
+
+- `"repeats": true` — enables hold-to-repeat for the mapping
+- `"repeatDelay"` (default 0.3s) — initial delay before repeating starts
+- `"repeatInterval"` (default 0.05s / ~20 repeats/sec) — time between repeated fires
+
+Defaults match macOS key repeat feel. Releasing the button or releasing L1 (for L1-layer buttons) stops repeat immediately. The HUD fires once on initial press but does not flash on each repeat.
+
+By default, only L1+Circle (Delete) has repeat enabled.
 
 ### App Lifecycle
 
@@ -210,7 +227,7 @@ CGEvent injection requires Accessibility permission. The app must:
 
 - **Custom mapping UI** — visual controller layout where you click a button and assign a shortcut
 - **Multiple profiles** — switch between "Vibe Mode", "Git Mode", "Debug Mode"
-- **Built-in voice-to-text** — capture audio from DualSense mic via AVAudioEngine, run through Whisper.cpp locally for zero-latency voice prompts (no external dictation app needed)
+- **Built-in voice-to-text (blocked on Apple)** — DualSense mic is inaccessible on macOS. Apple's GameController framework has no audio APIs, and macOS does not register the controller as a USB Audio Class device (unlike Windows/Linux where it works). This is not a hardware limitation — the DualSense uses standard UAC 1.0. Filed as Apple Developer Forums request. If Apple adds support, capture audio via AVAudioEngine + WhisperKit locally. Until then, VibePad uses the external-tool-shortcut approach (L2 fires user's voice app hotkey).
 - **Haptic feedback** — DualSense adaptive triggers (rumble on build fail, pulse on success)
 - **Stream overlay** — OBS-compatible overlay showing controller inputs for Twitch
 - **Combo macros** — L1+X = custom multi-step action

@@ -19,6 +19,9 @@ struct ActionConfig: Codable, Sendable {
     var modifiers: [String]?  // for keystroke
     var text: String?         // for typeText
     var description: String?  // human-readable label for HUD
+    var repeats: Bool?        // hold-to-repeat (default false)
+    var repeatDelay: Double?  // seconds before repeat starts (default 0.3)
+    var repeatInterval: Double? // seconds between repeats (default 0.05)
 }
 
 struct StickConfig: Codable, Sendable {
@@ -82,10 +85,12 @@ extension VibePadConfig {
             version: 1,
             profile: "claude-code",
             mappings: InputMapper.defaultMappings.reduce(into: [:]) { dict, pair in
-                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key])
+                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key],
+                                                       repeatConfig: InputMapper.defaultRepeatConfigs[pair.key])
             },
             l1Mappings: InputMapper.l1Mappings.reduce(into: [:]) { dict, pair in
-                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key])
+                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.l1Descriptions[pair.key],
+                                                       repeatConfig: InputMapper.l1RepeatDefaults[pair.key])
             },
             stickConfig: StickConfig(
                 leftStickDeadzone: 0.3,
@@ -102,12 +107,17 @@ extension VibePadConfig {
 
 extension ActionConfig {
 
-    init(from action: MappedAction, description: String? = nil) {
+    init(from action: MappedAction, description: String? = nil,
+         repeatConfig: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)? = nil) {
         switch action {
         case .keystroke(let key, let modifiers):
-            self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil, description: description)
+            self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil, description: description,
+                      repeats: repeatConfig != nil ? true : nil,
+                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval)
         case .typeText(let text):
-            self.init(type: "typeText", key: nil, modifiers: nil, text: text, description: description)
+            self.init(type: "typeText", key: nil, modifiers: nil, text: text, description: description,
+                      repeats: repeatConfig != nil ? true : nil,
+                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval)
         }
     }
 
@@ -157,6 +167,19 @@ extension Dictionary where Key == String, Value == ActionConfig {
             guard let button = GamepadButton(rawValue: name),
                   let desc = actionConfig.description else { continue }
             result[button] = desc
+        }
+        return result
+    }
+
+    func toButtonRepeatConfigs() -> [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] {
+        var result: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [:]
+        for (name, actionConfig) in self {
+            guard let button = GamepadButton(rawValue: name),
+                  actionConfig.repeats == true else { continue }
+            result[button] = (
+                delay: actionConfig.repeatDelay ?? 0.3,
+                interval: actionConfig.repeatInterval ?? 0.05
+            )
         }
         return result
     }

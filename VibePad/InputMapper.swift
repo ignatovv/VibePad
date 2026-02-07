@@ -4,6 +4,7 @@
 //
 
 import CoreGraphics
+import Foundation
 
 enum MappedAction: Equatable {
     case keystroke(key: String, modifiers: [String])
@@ -16,6 +17,11 @@ final class InputMapper {
     private var isL1Held = false
 
     var onAction: ((GamepadButton?, MappedAction, String?) -> Void)?
+
+    // MARK: - Button repeat constants
+
+    private static let buttonRepeatDelay: CFAbsoluteTime = 0.15
+    private static let buttonRepeatInterval: CFAbsoluteTime = 0.02
 
     // MARK: - Default mappings (Claude Code / terminal)
 
@@ -47,6 +53,14 @@ final class InputMapper {
         .buttonB:       "Delete",
     ]
 
+    // MARK: - Default repeat configs
+
+    static let defaultRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [:]
+
+    static let l1RepeatDefaults: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [
+        .buttonB: (buttonRepeatDelay, buttonRepeatInterval),  // L1+Circle Delete repeats
+    ]
+
     // MARK: - Default descriptions
 
     static let defaultDescriptions: [GamepadButton: String] = [
@@ -70,6 +84,13 @@ final class InputMapper {
     private let activeL1Mappings: [GamepadButton: MappedAction]
     private let activeDescriptions: [GamepadButton: String]
     private let activeL1Descriptions: [GamepadButton: String]
+
+    // MARK: - Button repeat config & state
+
+    private let activeRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
+    private let activeL1RepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
+    private var heldRepeatButtons: [GamepadButton: (lastFire: CFAbsoluteTime, isL1: Bool)] = [:]
+    private var repeatTimer: Timer?
 
     // MARK: - Arrow key hold state (left stick)
 
@@ -108,6 +129,8 @@ final class InputMapper {
         self.activeL1Mappings = Self.l1Mappings
         self.activeDescriptions = Self.defaultDescriptions
         self.activeL1Descriptions = Self.l1Descriptions
+        self.activeRepeatConfigs = Self.defaultRepeatConfigs
+        self.activeL1RepeatConfigs = Self.l1RepeatDefaults
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
@@ -119,6 +142,8 @@ final class InputMapper {
         self.activeL1Mappings = Self.l1Mappings.merging(config.l1Mappings?.toButtonMappings() ?? [:]) { _, new in new }
         self.activeDescriptions = Self.defaultDescriptions.merging(config.mappings.toButtonDescriptions()) { _, new in new }
         self.activeL1Descriptions = Self.l1Descriptions.merging(config.l1Mappings?.toButtonDescriptions() ?? [:]) { _, new in new }
+        self.activeRepeatConfigs = Self.defaultRepeatConfigs.merging(config.mappings.toButtonRepeatConfigs()) { _, new in new }
+        self.activeL1RepeatConfigs = Self.l1RepeatDefaults.merging(config.l1Mappings?.toButtonRepeatConfigs() ?? [:]) { _, new in new }
         let stick = config.stickConfig
         self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
@@ -130,22 +155,84 @@ final class InputMapper {
     func handleButton(_ button: GamepadButton, pressed: Bool) {
         if button == .leftShoulder {
             isL1Held = pressed
+            if !pressed {
+                // L1 released — stop all L1-layer repeats
+                for (btn, state) in heldRepeatButtons where state.isL1 {
+                    heldRepeatButtons.removeValue(forKey: btn)
+                }
+                if heldRepeatButtons.isEmpty { stopRepeatTimer() }
+            }
             return
         }
-        guard pressed else { return }
 
-        let action = isL1Held
+        let usingL1 = isL1Held
+        let action = usingL1
             ? activeL1Mappings[button] ?? activeMappings[button]
             : activeMappings[button]
 
-        guard let action else { return }
-        let description = isL1Held ? (activeL1Descriptions[button] ?? activeDescriptions[button]) : activeDescriptions[button]
-        onAction?(button, action, description)
+        let repeatConfig = usingL1
+            ? activeL1RepeatConfigs[button] ?? activeRepeatConfigs[button]
+            : activeRepeatConfigs[button]
+
+        if pressed {
+            guard let action else { return }
+            let description = usingL1 ? (activeL1Descriptions[button] ?? activeDescriptions[button]) : activeDescriptions[button]
+            onAction?(button, action, description)
+            fireAction(action)
+
+            if repeatConfig != nil {
+                heldRepeatButtons[button] = (lastFire: CFAbsoluteTimeGetCurrent(), isL1: usingL1)
+                startRepeatTimerIfNeeded()
+            }
+        } else {
+            // Release — stop repeat for this button
+            if heldRepeatButtons.removeValue(forKey: button) != nil {
+                if heldRepeatButtons.isEmpty { stopRepeatTimer() }
+            }
+        }
+    }
+
+    private func fireAction(_ action: MappedAction) {
         switch action {
         case .keystroke(let key, let modifiers):
             emitter.postKeystroke(key: key, modifiers: modifiers)
         case .typeText(let text):
             emitter.typeText(text)
+        }
+    }
+
+    // MARK: - Button repeat timer
+
+    private func startRepeatTimerIfNeeded() {
+        guard repeatTimer == nil else { return }
+        repeatTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+            self?.tickRepeat()
+        }
+    }
+
+    private func stopRepeatTimer() {
+        repeatTimer?.invalidate()
+        repeatTimer = nil
+    }
+
+    private func tickRepeat() {
+        let now = CFAbsoluteTimeGetCurrent()
+        for (button, state) in heldRepeatButtons {
+            let usingL1 = state.isL1
+            let repeatCfg = usingL1
+                ? activeL1RepeatConfigs[button] ?? activeRepeatConfigs[button]
+                : activeRepeatConfigs[button]
+            guard let repeatCfg else { continue }
+
+            let elapsed = now - state.lastFire
+            let threshold = elapsed < repeatCfg.delay + repeatCfg.interval ? repeatCfg.delay : repeatCfg.interval
+            if elapsed >= threshold {
+                let action = usingL1
+                    ? activeL1Mappings[button] ?? activeMappings[button]
+                    : activeMappings[button]
+                if let action { fireAction(action) }
+                heldRepeatButtons[button] = (lastFire: now, isL1: usingL1)
+            }
         }
     }
 
