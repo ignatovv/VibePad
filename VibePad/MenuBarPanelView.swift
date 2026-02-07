@@ -50,6 +50,9 @@ struct MenuBarPanelView: View {
             // MARK: Actions
             VStack(spacing: 0) {
                 ActionRow(icon: "doc.text", label: "Custom Key Bindings") {
+                    if !FileManager.default.fileExists(atPath: VibePadConfig.configFileURL.path) {
+                        VibePadConfig.writeCurrentDefaults()
+                    }
                     NSWorkspace.shared.open(VibePadConfig.configFileURL)
                 }
 

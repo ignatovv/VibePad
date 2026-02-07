@@ -42,14 +42,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         launchAtLoginOnStartup = launchAtLogin
         print("[VibePad] Accessibility granted: \(isAccessibilityGranted)")
 
-        let (config, existed) = VibePadConfig.load()
-        if !existed {
-            VibePadConfig.writeDefaults(config)
-        }
-
+        let config = VibePadConfig.load()
         let emitter = KeyboardEmitter()
-        let mapper = InputMapper(emitter: emitter, config: config)
-        let stickConfig = config.stickConfig
+        let mapper: InputMapper
+        if let config {
+            mapper = InputMapper(emitter: emitter, config: config)
+        } else {
+            mapper = InputMapper(emitter: emitter)
+        }
+        let stickConfig = config?.stickConfig
         let manager = GamepadManager(
             leftStickDeadzone: stickConfig?.leftStickDeadzone ?? 0.3,
             rightStickDeadzone: stickConfig?.rightStickDeadzone ?? 0.2

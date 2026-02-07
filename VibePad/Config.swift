@@ -45,28 +45,28 @@ extension VibePadConfig {
         configDirectory.appendingPathComponent("config.json")
     }
 
-    /// Load config from disk. Returns (config, existed) where `existed` is false if the file was missing.
-    static func load() -> (config: VibePadConfig, existed: Bool) {
+    /// Load config from disk. Returns nil if the file doesn't exist.
+    static func load() -> VibePadConfig? {
         let path = configFileURL
         guard FileManager.default.fileExists(atPath: path.path) else {
             print("[VibePad] No config file at \(path.path), using defaults")
-            return (defaultConfig(), false)
+            return nil
         }
         do {
             let data = try Data(contentsOf: path)
             let decoder = JSONDecoder()
             let config = try decoder.decode(VibePadConfig.self, from: data)
             print("[VibePad] Loaded config from \(path.path) (profile: \(config.profile))")
-            return (config, true)
+            return config
         } catch {
             print("[VibePad] Failed to parse config: \(error). Using defaults.")
-            return (defaultConfig(), true)
+            return nil
         }
     }
 
-    /// Write the given config (or defaults) to disk.
-    static func writeDefaults(_ config: VibePadConfig? = nil) {
-        let config = config ?? defaultConfig()
+    /// Write current code defaults to disk (on-demand, e.g. when user opens Custom Key Bindings).
+    static func writeCurrentDefaults() {
+        let config = defaultConfig()
         do {
             let dir = configDirectory
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
