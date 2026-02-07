@@ -24,9 +24,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         isAccessibilityGranted = AccessibilityHelper.checkAndPrompt()
         print("[VibePad] Accessibility granted: \(isAccessibilityGranted)")
 
+        let (config, existed) = VibePadConfig.load()
+        if !existed {
+            VibePadConfig.writeDefaults(config)
+        }
+
         let emitter = KeyboardEmitter()
-        let mapper = InputMapper(emitter: emitter)
-        let manager = GamepadManager()
+        let mapper = InputMapper(emitter: emitter, config: config)
+        let stickConfig = config.stickConfig
+        let manager = GamepadManager(
+            leftStickDeadzone: stickConfig?.leftStickDeadzone ?? 0.3,
+            rightStickDeadzone: stickConfig?.rightStickDeadzone ?? 0.2
+        )
 
         manager.onButtonPressed = { [weak self] button, pressed in
             guard let self, self.isEnabled else {

@@ -5,7 +5,7 @@
 
 import CoreGraphics
 
-enum MappedAction {
+enum MappedAction: Equatable {
     case keystroke(key: String, modifiers: [String])
     case typeText(String)
 }
@@ -26,11 +26,11 @@ final class InputMapper {
         .dpadDown:             .keystroke(key: "downArrow", modifiers: []),            // Command history
         .dpadLeft:             .keystroke(key: "leftBracket", modifiers: ["command", "shift"]),  // Prev tab
         .dpadRight:            .keystroke(key: "rightBracket", modifiers: ["command", "shift"]), // Next tab
-        .rightShoulder:        .keystroke(key: "tab", modifiers: []),                  // Shell autocomplete
+        // R1 (.rightShoulder) — unassigned, reserved for future use
         .leftTrigger:          .keystroke(key: "space", modifiers: ["option"]),        // Voice (future)
         .rightTrigger:         .keystroke(key: "return", modifiers: []),               // Submit / Enter
-        .leftThumbstickButton: .keystroke(key: "r", modifiers: ["control"]),           // Ctrl+R reverse search
-        .rightThumbstickButton: .keystroke(key: "l", modifiers: ["control"]),          // Ctrl+L clear screen
+        // L3 (.leftThumbstickButton) — unassigned, reserved for future use
+        // R3 (.rightThumbstickButton) — unassigned, reserved for future use
         .buttonMenu:           .typeText("/commit\n"),                                 // Ship it
         .buttonOptions:        .typeText("/help\n"),                                   // Quick reference
     ]
@@ -44,6 +44,11 @@ final class InputMapper {
         .buttonY: .typeText("/review\n"),                           // Review changes
     ]
 
+    // MARK: - Active mappings (from config or defaults)
+
+    private let activeMappings: [GamepadButton: MappedAction]
+    private let activeL1Mappings: [GamepadButton: MappedAction]
+
     // MARK: - Arrow key hold state (left stick)
 
     private var arrowUpHeld = false
@@ -52,16 +57,31 @@ final class InputMapper {
     private var arrowRightHeld = false
 
     // Hysteresis thresholds for stick → arrow
-    private let arrowPressThreshold: Float = 0.5
-    private let arrowReleaseThreshold: Float = 0.3
+    private let arrowPressThreshold: Float
+    private let arrowReleaseThreshold: Float
 
     // Scroll sensitivity
-    private let scrollSensitivity: Float = 5.0
+    private let scrollSensitivity: Float
 
     // MARK: - Init
 
     init(emitter: KeyboardEmitter) {
         self.emitter = emitter
+        self.activeMappings = Self.defaultMappings
+        self.activeL1Mappings = Self.l1Mappings
+        self.arrowPressThreshold = 0.5
+        self.arrowReleaseThreshold = 0.3
+        self.scrollSensitivity = 5.0
+    }
+
+    init(emitter: KeyboardEmitter, config: VibePadConfig) {
+        self.emitter = emitter
+        self.activeMappings = config.mappings.toButtonMappings()
+        self.activeL1Mappings = config.l1Mappings?.toButtonMappings() ?? [:]
+        let stick = config.stickConfig
+        self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
+        self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
+        self.scrollSensitivity = stick?.scrollSensitivity ?? 5.0
     }
 
     // MARK: - Button handling
@@ -74,8 +94,8 @@ final class InputMapper {
         guard pressed else { return }
 
         let action = isL1Held
-            ? Self.l1Mappings[button] ?? Self.defaultMappings[button]
-            : Self.defaultMappings[button]
+            ? activeL1Mappings[button] ?? activeMappings[button]
+            : activeMappings[button]
 
         guard let action else { return }
         switch action {

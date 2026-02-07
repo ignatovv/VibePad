@@ -122,15 +122,15 @@ case " ": postKeystroke(key: "space")
 
 ---
 
-### Story 6: Shell autocomplete
-> "I'm typing a path or command and press R1 to autocomplete."
+### Story 6: R1 — unassigned
+> R1 is reserved for future use. Shell autocomplete (Tab) was removed because the voice-driven workflow doesn't require typing partial commands.
 
-| Button | Action | Why this button |
-|--------|--------|-----------------|
-| R1 | Tab | R1 = right shoulder = easy reach, Tab = autocomplete |
+| Button | Action | Why |
+|--------|--------|-----|
+| R1 | *unassigned* | Prime button, saved for a higher-value mapping TBD |
 
 **Tests:**
-- [ ] **T11** — Type `cd ~/Docu` then press R1. Shell completes to `Documents/`.
+- [ ] **T11** — Press R1. Nothing should happen.
 
 ---
 
@@ -146,17 +146,17 @@ case " ": postKeystroke(key: "space")
 
 ---
 
-### Story 8: Shell power moves
-> "Quick access to reverse search and clear screen."
+### Story 8: Stick clicks
+> "R3 clears the terminal. L3 is reserved for future use."
 
 | Button | Action | Why this button |
 |--------|--------|-----------------|
-| L3 (left stick click) | Ctrl+R | Reverse search = "search through" the stick |
-| R3 (right stick click) | Ctrl+L | Clear screen = "wipe" the stick |
+| L3 (left stick click) | *unassigned* | Reserved for future use |
+| R3 (right stick click) | *unassigned* | Reserved for future use |
 
 **Tests:**
-- [ ] **T13** — Press L3. Reverse search prompt `(reverse-i-search)` appears.
-- [ ] **T14** — Press R3. Terminal screen clears.
+- [ ] **T13** — Press L3. Nothing should happen.
+- [ ] **T14** — Press R3. Nothing should happen.
 
 ---
 

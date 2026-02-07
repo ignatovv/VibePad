@@ -32,13 +32,20 @@ final class GamepadManager {
     private var leftTriggerPressed = false
     private var rightTriggerPressed = false
 
-    // Deadzone constants
-    private let leftStickDeadzone: Float = 0.3
-    private let rightStickDeadzone: Float = 0.2
+    // Deadzone values (configurable via init)
+    private let leftStickDeadzone: Float
+    private let rightStickDeadzone: Float
 
     // Trigger hysteresis thresholds
     private let triggerPressThreshold: Float = 0.5
     private let triggerReleaseThreshold: Float = 0.3
+
+    // MARK: - Init
+
+    init(leftStickDeadzone: Float = 0.3, rightStickDeadzone: Float = 0.2) {
+        self.leftStickDeadzone = leftStickDeadzone
+        self.rightStickDeadzone = rightStickDeadzone
+    }
 
     // MARK: - Start / Stop
 

@@ -67,13 +67,13 @@ Ship ONE opinionated preset optimized for Cursor/VS Code + terminal:
 | **D-pad Left** | Previous Tab | `Cmd+Shift+[` | Switch tabs |
 | **D-pad Right** | Next Tab | `Cmd+Shift+]` | Switch tabs |
 | **L1** | Switch Panel | `` Cmd+` `` | Toggle terminal/editor |
-| **R1** | Command Palette | `Cmd+Shift+P` | Access any command |
+| **R1** | *Unassigned* | — | Reserved for future use |
 | **L2 (hold)** | Voice Trigger | User-configured shortcut | Activate voice-to-text |
 | **R2** | Run/Execute | `Cmd+Enter` | Run in terminal / accept |
 | **Left Stick** | Arrow Keys | `↑↓←→` | Cursor movement |
 | **Right Stick** | Scroll | Scroll events | Scroll viewport |
-| **Left Stick Click** | Toggle Sidebar | `Cmd+B` | Show/hide sidebar |
-| **Right Stick Click** | Toggle Terminal | `` Ctrl+` `` | Show/hide terminal |
+| **Left Stick Click** | *Unassigned* | — | Reserved for future use |
+| **Right Stick Click** | *Unassigned* | — | Reserved for future use |
 | **Start/Menu** | Git Commit | `Cmd+Shift+G` | Source control |
 | **Select/Share** | Quick Fix | `Cmd+.` | Code actions |
 
