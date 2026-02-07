@@ -22,6 +22,7 @@ struct ActionConfig: Codable, Sendable {
     var repeats: Bool?        // hold-to-repeat (default false)
     var repeatDelay: Double?  // seconds before repeat starts (default 0.3)
     var repeatInterval: Double? // seconds between repeats (default 0.05)
+    var trigger: String?      // "onPress" (default), "onRelease", "onPressAndRelease"
 }
 
 struct StickConfig: Codable, Sendable {
@@ -86,11 +87,13 @@ extension VibePadConfig {
             profile: "claude-code",
             mappings: InputMapper.defaultMappings.reduce(into: [:]) { dict, pair in
                 dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key],
-                                                       repeatConfig: InputMapper.defaultRepeatConfigs[pair.key])
+                                                       repeatConfig: InputMapper.defaultRepeatConfigs[pair.key],
+                                                       triggerMode: InputMapper.defaultTriggerModes[pair.key])
             },
             l1Mappings: InputMapper.l1Mappings.reduce(into: [:]) { dict, pair in
                 dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.l1Descriptions[pair.key],
-                                                       repeatConfig: InputMapper.l1RepeatDefaults[pair.key])
+                                                       repeatConfig: InputMapper.l1RepeatDefaults[pair.key],
+                                                       triggerMode: InputMapper.l1TriggerDefaults[pair.key])
             },
             stickConfig: StickConfig(
                 leftStickDeadzone: 0.3,
@@ -108,16 +111,19 @@ extension VibePadConfig {
 extension ActionConfig {
 
     init(from action: MappedAction, description: String? = nil,
-         repeatConfig: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)? = nil) {
+         repeatConfig: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)? = nil,
+         triggerMode: TriggerMode? = nil) {
         switch action {
         case .keystroke(let key, let modifiers):
             self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil, description: description,
                       repeats: repeatConfig != nil ? true : nil,
-                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval)
+                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         case .typeText(let text):
             self.init(type: "typeText", key: nil, modifiers: nil, text: text, description: description,
                       repeats: repeatConfig != nil ? true : nil,
-                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval)
+                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         }
     }
 
@@ -180,6 +186,17 @@ extension Dictionary where Key == String, Value == ActionConfig {
                 delay: actionConfig.repeatDelay ?? 0.3,
                 interval: actionConfig.repeatInterval ?? 0.05
             )
+        }
+        return result
+    }
+
+    func toButtonTriggerModes() -> [GamepadButton: TriggerMode] {
+        var result: [GamepadButton: TriggerMode] = [:]
+        for (name, actionConfig) in self {
+            guard let button = GamepadButton(rawValue: name),
+                  let triggerStr = actionConfig.trigger,
+                  let mode = TriggerMode(rawValue: triggerStr) else { continue }
+            result[button] = mode
         }
         return result
     }

@@ -11,6 +11,12 @@ enum MappedAction: Equatable {
     case typeText(String)
 }
 
+enum TriggerMode: String, Codable, Sendable {
+    case onPress
+    case onRelease
+    case onPressAndRelease
+}
+
 final class InputMapper {
 
     private let emitter: KeyboardEmitter
@@ -61,6 +67,14 @@ final class InputMapper {
         .buttonB: (buttonRepeatDelay, buttonRepeatInterval),  // L1+Circle Delete repeats
     ]
 
+    // MARK: - Default trigger modes
+
+    static let defaultTriggerModes: [GamepadButton: TriggerMode] = [
+        .leftTrigger: .onPressAndRelease,  // Hold-to-talk for voice input
+    ]
+
+    static let l1TriggerDefaults: [GamepadButton: TriggerMode] = [:]
+
     // MARK: - Default descriptions
 
     static let defaultDescriptions: [GamepadButton: String] = [
@@ -89,6 +103,11 @@ final class InputMapper {
 
     private let activeRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
     private let activeL1RepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
+
+    // MARK: - Trigger modes
+
+    private let activeTriggerModes: [GamepadButton: TriggerMode]
+    private let activeL1TriggerModes: [GamepadButton: TriggerMode]
     private var heldRepeatButtons: [GamepadButton: (lastFire: CFAbsoluteTime, isL1: Bool)] = [:]
     private var repeatTimer: Timer?
 
@@ -131,6 +150,8 @@ final class InputMapper {
         self.activeL1Descriptions = Self.l1Descriptions
         self.activeRepeatConfigs = Self.defaultRepeatConfigs
         self.activeL1RepeatConfigs = Self.l1RepeatDefaults
+        self.activeTriggerModes = Self.defaultTriggerModes
+        self.activeL1TriggerModes = Self.l1TriggerDefaults
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
@@ -144,6 +165,8 @@ final class InputMapper {
         self.activeL1Descriptions = Self.l1Descriptions.merging(config.l1Mappings?.toButtonDescriptions() ?? [:]) { _, new in new }
         self.activeRepeatConfigs = Self.defaultRepeatConfigs.merging(config.mappings.toButtonRepeatConfigs()) { _, new in new }
         self.activeL1RepeatConfigs = Self.l1RepeatDefaults.merging(config.l1Mappings?.toButtonRepeatConfigs() ?? [:]) { _, new in new }
+        self.activeTriggerModes = Self.defaultTriggerModes.merging(config.mappings.toButtonTriggerModes()) { _, new in new }
+        self.activeL1TriggerModes = Self.l1TriggerDefaults.merging(config.l1Mappings?.toButtonTriggerModes() ?? [:]) { _, new in new }
         let stick = config.stickConfig
         self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
@@ -174,12 +197,25 @@ final class InputMapper {
             ? activeL1RepeatConfigs[button] ?? activeRepeatConfigs[button]
             : activeRepeatConfigs[button]
 
-        if pressed {
+        let triggerMode = usingL1
+            ? activeL1TriggerModes[button] ?? activeTriggerModes[button] ?? .onPress
+            : activeTriggerModes[button] ?? .onPress
+
+        let shouldFire: Bool
+        switch triggerMode {
+        case .onPress:            shouldFire = pressed
+        case .onRelease:          shouldFire = !pressed
+        case .onPressAndRelease:  shouldFire = true
+        }
+
+        if shouldFire {
             guard let action else { return }
             let description = usingL1 ? (activeL1Descriptions[button] ?? activeDescriptions[button]) : activeDescriptions[button]
             onAction?(button, action, description)
             fireAction(action)
+        }
 
+        if pressed {
             if repeatConfig != nil {
                 heldRepeatButtons[button] = (lastFire: CFAbsoluteTimeGetCurrent(), isL1: usingL1)
                 startRepeatTimerIfNeeded()
