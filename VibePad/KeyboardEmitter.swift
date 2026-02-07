@@ -107,6 +107,14 @@ final class KeyboardEmitter {
         }
     }
 
+    func postKeystroke(keyCode: CGKeyCode) {
+        guard let down = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true),
+              let up = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)
+        else { return }
+        down.post(tap: .cghidEventTap)
+        up.post(tap: .cghidEventTap)
+    }
+
     // MARK: - Key down / up (for held keys like arrows)
 
     func postKeyDown(keyCode: CGKeyCode) {

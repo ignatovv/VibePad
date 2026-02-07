@@ -146,31 +146,17 @@ case " ": postKeystroke(key: "space")
 
 ---
 
-### Story 8: Stick clicks
-> "R3 clears the terminal. L3 is reserved for future use."
+### Story 8: Slash command prefix
+> "I press Menu to type `/` and pick a slash command from the list."
 
 | Button | Action | Why this button |
 |--------|--------|-----------------|
-| L3 (left stick click) | *unassigned* | Reserved for future use |
-| R3 (right stick click) | *unassigned* | Reserved for future use |
+| Menu | Types `/` | Menu = quick access to slash commands |
+| Options | *unassigned* | Reserved for future use |
 
 **Tests:**
-- [ ] **T13** — Press L3. Nothing should happen.
-- [ ] **T14** — Press R3. Nothing should happen.
-
----
-
-### Story 9: Fire slash commands
-> "I press Menu to commit, Options for help. No typing needed."
-
-| Button | Action | Why this button |
-|--------|--------|-----------------|
-| Menu | Types `/commit\n` | Menu = "main action" = ship it |
-| Options | Types `/help\n` | Options = "what can I do?" |
-
-**Tests (after typeText bug is fixed):**
-- [ ] **T15** — In Claude Code session, press Menu. `/commit` is typed and submitted.
-- [ ] **T16** — In Claude Code session, press Options. `/help` is typed and submitted.
+- [ ] **T15** — In Claude Code session, press Menu. `/` is typed, command list appears.
+- [ ] **T16** — Press Options. Nothing should happen.
 
 ---
 
@@ -179,16 +165,16 @@ case " ": postKeystroke(key: "space")
 
 | Combo | Action | Why |
 |-------|--------|-----|
-| L1 + ✕ | Types `/compact\n` | Compact context when it's getting long |
+| L1 + ✕ | *unassigned* | Reserved for future use |
 | L1 + ○ | ⌘Z (Undo) | ○ = cancel → undo last action |
 | L1 + □ | Ctrl+D (EOF) | □ = stop → close/exit |
-| L1 + △ | Types `/review\n` | △ = inspect → review changes |
+| L1 + △ | *unassigned* | Reserved for future use |
 
-**Tests (after typeText bug is fixed):**
-- [ ] **T17** — Hold L1, press ✕. Types `/compact` + Enter.
+**Tests:**
+- [ ] **T17** — Hold L1, press ✕. Nothing should happen (falls through to base Enter).
 - [ ] **T18** — Hold L1, press ○. Sends ⌘Z (undo in a text editor).
 - [ ] **T19** — Hold L1, press □. Sends Ctrl+D (exits a shell or sends EOF).
-- [ ] **T20** — Hold L1, press △. Types `/review` + Enter.
+- [ ] **T20** — Hold L1, press △. Nothing should happen (falls through to base Paste).
 
 ---
 

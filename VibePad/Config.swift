@@ -91,7 +91,7 @@ extension VibePadConfig {
                 rightStickDeadzone: 0.2,
                 arrowPressThreshold: 0.5,
                 arrowReleaseThreshold: 0.3,
-                scrollSensitivity: 5.0
+                scrollSensitivity: 15.0
             )
         )
     }

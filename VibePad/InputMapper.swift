@@ -18,31 +18,27 @@ final class InputMapper {
     // MARK: - Default mappings (Claude Code / terminal)
 
     static let defaultMappings: [GamepadButton: MappedAction] = [
-        .buttonA:              .keystroke(key: "return", modifiers: []),                // Accept/confirm (Enter)
-        .buttonB:              .keystroke(key: "escape", modifiers: []),               // Cancel/back (Escape)
-        .buttonX:              .keystroke(key: "c", modifiers: ["control"]),           // Ctrl+C interrupt
-        .buttonY:              .keystroke(key: "v", modifiers: ["command"]),           // ⌘V paste
+        .buttonA:              .keystroke(key: "return", modifiers: []),                // ✕ Accept/confirm (Enter)
+        .buttonB:              .keystroke(key: "escape", modifiers: []),               // ○ Cancel/back (Escape)
+        .buttonX:              .keystroke(key: "c", modifiers: ["control"]),           // □ Ctrl+C interrupt
+        .buttonY:              .keystroke(key: "v", modifiers: ["command"]),           // △ ⌘V paste
         .dpadUp:               .keystroke(key: "upArrow", modifiers: []),              // Command history
         .dpadDown:             .keystroke(key: "downArrow", modifiers: []),            // Command history
         .dpadLeft:             .keystroke(key: "leftBracket", modifiers: ["command", "shift"]),  // Prev tab
         .dpadRight:            .keystroke(key: "rightBracket", modifiers: ["command", "shift"]), // Next tab
-        // R1 (.rightShoulder) — unassigned, reserved for future use
+        .rightShoulder:        .keystroke(key: "tab", modifiers: ["shift"]),             // R1 Shift+Tab mode switch
         .leftTrigger:          .keystroke(key: "space", modifiers: ["option"]),        // Voice (future)
         .rightTrigger:         .keystroke(key: "return", modifiers: []),               // Submit / Enter
-        // L3 (.leftThumbstickButton) — unassigned, reserved for future use
-        // R3 (.rightThumbstickButton) — unassigned, reserved for future use
-        .buttonMenu:           .typeText("/commit\n"),                                 // Ship it
-        .buttonOptions:        .typeText("/help\n"),                                   // Quick reference
+        // L3 (.leftThumbstickButton) — unassigned
+        // R3 (.rightThumbstickButton) — unassigned
+        .buttonMenu:           .typeText("/"),                                           // Slash command prefix
+        // Options (.buttonOptions) — unassigned, reserved for future use
     ]
 
     // MARK: - L1 layer mappings
 
-    static let l1Mappings: [GamepadButton: MappedAction] = [
-        .buttonA: .typeText("/compact\n"),                          // Compact context
-        .buttonB: .keystroke(key: "z", modifiers: ["command"]),     // Undo
-        .buttonX: .keystroke(key: "d", modifiers: ["control"]),     // EOF / exit
-        .buttonY: .typeText("/review\n"),                           // Review changes
-    ]
+    // All L1 combos unassigned — fall through to base layer
+    static let l1Mappings: [GamepadButton: MappedAction] = [:]
 
     // MARK: - Active mappings (from config or defaults)
 
@@ -55,6 +51,15 @@ final class InputMapper {
     private var arrowDownHeld = false
     private var arrowLeftHeld = false
     private var arrowRightHeld = false
+
+    // Arrow key repeat timing (CFAbsoluteTime)
+    private var arrowUpLastFire: CFAbsoluteTime = 0
+    private var arrowDownLastFire: CFAbsoluteTime = 0
+    private var arrowLeftLastFire: CFAbsoluteTime = 0
+    private var arrowRightLastFire: CFAbsoluteTime = 0
+
+    private let arrowRepeatDelay: CFAbsoluteTime = 0.15   // initial delay before repeat
+    private let arrowRepeatInterval: CFAbsoluteTime = 0.02 // ~50 repeats/sec
 
     // Hysteresis thresholds for stick → arrow
     private let arrowPressThreshold: Float
@@ -71,7 +76,7 @@ final class InputMapper {
         self.activeL1Mappings = Self.l1Mappings
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
-        self.scrollSensitivity = 5.0
+        self.scrollSensitivity = 15.0
     }
 
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
@@ -81,7 +86,7 @@ final class InputMapper {
         let stick = config.stickConfig
         self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
-        self.scrollSensitivity = stick?.scrollSensitivity ?? 5.0
+        self.scrollSensitivity = stick?.scrollSensitivity ?? 15.0
     }
 
     // MARK: - Button handling
@@ -110,35 +115,45 @@ final class InputMapper {
 
     func handleLeftStick(x: Float, y: Float) {
         updateArrow(
-            axis: y, held: &arrowUpHeld,
+            axis: y, held: &arrowUpHeld, lastFire: &arrowUpLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["upArrow"]!,
             positive: true
         )
         updateArrow(
-            axis: y, held: &arrowDownHeld,
+            axis: y, held: &arrowDownHeld, lastFire: &arrowDownLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["downArrow"]!,
             positive: false
         )
         updateArrow(
-            axis: x, held: &arrowRightHeld,
+            axis: x, held: &arrowRightHeld, lastFire: &arrowRightLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["rightArrow"]!,
             positive: true
         )
         updateArrow(
-            axis: x, held: &arrowLeftHeld,
+            axis: x, held: &arrowLeftHeld, lastFire: &arrowLeftLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["leftArrow"]!,
             positive: false
         )
     }
 
-    private func updateArrow(axis: Float, held: inout Bool, keyCode: CGKeyCode, positive: Bool) {
+    private func updateArrow(axis: Float, held: inout Bool, lastFire: inout CFAbsoluteTime, keyCode: CGKeyCode, positive: Bool) {
         let value = positive ? axis : -axis
+        let now = CFAbsoluteTimeGetCurrent()
+
         if !held && value > arrowPressThreshold {
             held = true
-            emitter.postKeyDown(keyCode: keyCode)
+            emitter.postKeystroke(keyCode: keyCode)
+            lastFire = now
+        } else if held && value >= arrowReleaseThreshold {
+            // Still held — repeat after initial delay, then at repeat interval
+            let elapsed = now - lastFire
+            let threshold = (elapsed < arrowRepeatDelay + arrowRepeatInterval) ? arrowRepeatDelay : arrowRepeatInterval
+            if now - lastFire >= threshold {
+                emitter.postKeystroke(keyCode: keyCode)
+                lastFire = now
+            }
         } else if held && value < arrowReleaseThreshold {
             held = false
-            emitter.postKeyUp(keyCode: keyCode)
         }
     }
 
@@ -146,7 +161,7 @@ final class InputMapper {
 
     func handleRightStick(x: Float, y: Float) {
         let dx = Int32(x * scrollSensitivity)
-        let dy = Int32(-y * scrollSensitivity)   // inverted: stick up = scroll up (negative pixel delta)
+        let dy = Int32(y * scrollSensitivity)
         if dx != 0 || dy != 0 {
             emitter.postScroll(deltaX: dx, deltaY: dy)
         }

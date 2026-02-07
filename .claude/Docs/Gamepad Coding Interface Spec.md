@@ -74,8 +74,8 @@ Ship ONE opinionated preset optimized for Cursor/VS Code + terminal:
 | **Right Stick** | Scroll | Scroll events | Scroll viewport |
 | **Left Stick Click** | *Unassigned* | — | Reserved for future use |
 | **Right Stick Click** | *Unassigned* | — | Reserved for future use |
-| **Start/Menu** | Git Commit | `Cmd+Shift+G` | Source control |
-| **Select/Share** | Quick Fix | `Cmd+.` | Code actions |
+| **Start/Menu** | Slash prefix | Types `/` | Quick access to slash commands |
+| **Select/Share** | *Unassigned* | — | Reserved for future use |
 
 ### 3. Keyboard Injection
 
@@ -215,6 +215,7 @@ CGEvent injection requires Accessibility permission. The app must:
 - **Stream overlay** — OBS-compatible overlay showing controller inputs for Twitch
 - **Combo macros** — L1+X = custom multi-step action
 - **Community configs** — share/import mapping profiles
+- **Call-to-action** — prompt users to follow on Twitter/X (or donate). Could be a subtle link in the menu bar panel, a one-time HUD prompt, or both. Decide on handle and placement before implementing.
 
 ---
 
