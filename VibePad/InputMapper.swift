@@ -94,6 +94,12 @@ final class InputMapper {
     // Scroll sensitivity
     private let scrollSensitivity: Float
 
+    // Right stick scroll HUD state (fire once per direction)
+    private var scrollUpActive = false
+    private var scrollDownActive = false
+    private var scrollLeftActive = false
+    private var scrollRightActive = false
+
     // MARK: - Init
 
     init(emitter: KeyboardEmitter) {
@@ -201,6 +207,34 @@ final class InputMapper {
     func handleRightStick(x: Float, y: Float) {
         let dx = Int32(x * scrollSensitivity)
         let dy = Int32(y * scrollSensitivity)
+
+        // HUD on initial scroll — dominant axis only to avoid crosstalk
+        let dominantVertical = abs(dy) >= abs(dx)
+
+        if dominantVertical {
+            if dy > 0 && !scrollUpActive {
+                scrollUpActive = true
+                onAction?(nil, .typeText("Scroll ↑"), nil)
+            } else if dy <= 0 { scrollUpActive = false }
+            if dy < 0 && !scrollDownActive {
+                scrollDownActive = true
+                onAction?(nil, .typeText("Scroll ↓"), nil)
+            } else if dy >= 0 { scrollDownActive = false }
+            scrollLeftActive = false
+            scrollRightActive = false
+        } else {
+            if dx > 0 && !scrollRightActive {
+                scrollRightActive = true
+                onAction?(nil, .typeText("Scroll →"), nil)
+            } else if dx <= 0 { scrollRightActive = false }
+            if dx < 0 && !scrollLeftActive {
+                scrollLeftActive = true
+                onAction?(nil, .typeText("Scroll ←"), nil)
+            } else if dx >= 0 { scrollLeftActive = false }
+            scrollUpActive = false
+            scrollDownActive = false
+        }
+
         if dx != 0 || dy != 0 {
             emitter.postScroll(deltaX: dx, deltaY: dy)
         }
