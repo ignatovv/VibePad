@@ -18,6 +18,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var controllerName: String?
     var isAccessibilityGranted = false
 
+    var menuBarIcon: String {
+        if !isAccessibilityGranted {
+            return "menubar-alert"
+        } else if controllerName == nil {
+            return "menubar-disconnected"
+        } else if !isEnabled {
+            return "menubar-sleeping"
+        } else {
+            return "menubar-active"
+        }
+    }
+
     var launchAtLogin = false
     private(set) var launchAtLoginOnStartup = false
 

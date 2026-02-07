@@ -39,7 +39,7 @@ struct MenuBarPanelView: View {
                 ActionRow(
                     icon: "exclamationmark.triangle.fill",
                     iconColor: .yellow,
-                    label: "Grant Accessibility Access..."
+                    label: "Please Grant Accessibility Access"
                 ) {
                     AccessibilityHelper.checkAndPrompt()
                 }
@@ -118,8 +118,10 @@ private struct HeaderRow: View {
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 18))
+                    Image(appDelegate.menuBarIcon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 22, height: 22)
                         .foregroundStyle(.secondary)
                     Text("VibePad")
                         .font(.headline)
