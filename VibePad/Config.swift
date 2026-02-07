@@ -14,9 +14,10 @@ struct VibePadConfig: Codable, Sendable {
 }
 
 struct ActionConfig: Codable, Sendable {
-    var type: String          // "keystroke" or "typeText"
-    var key: String?          // for keystroke
-    var modifiers: [String]?  // for keystroke
+    var type: String          // "keystroke", "stickyKeystroke", or "typeText"
+    var key: String?          // for keystroke / stickyKeystroke
+    var modifiers: [String]?  // for keystroke / stickyKeystroke (per-keystroke)
+    var stickyModifiers: [String]?  // for stickyKeystroke (held until L1 release)
     var text: String?         // for typeText
     var description: String?  // human-readable label for HUD
     var repeats: Bool?        // hold-to-repeat (default false)
@@ -115,12 +116,17 @@ extension ActionConfig {
          triggerMode: TriggerMode? = nil) {
         switch action {
         case .keystroke(let key, let modifiers):
-            self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil, description: description,
+            self.init(type: "keystroke", key: key, modifiers: modifiers, stickyModifiers: nil, text: nil, description: description,
+                      repeats: repeatConfig != nil ? true : nil,
+                      repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
+        case .stickyKeystroke(let key, let modifiers, let stickyMods):
+            self.init(type: "stickyKeystroke", key: key, modifiers: modifiers, stickyModifiers: stickyMods, text: nil, description: description,
                       repeats: repeatConfig != nil ? true : nil,
                       repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
                       trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         case .typeText(let text):
-            self.init(type: "typeText", key: nil, modifiers: nil, text: text, description: description,
+            self.init(type: "typeText", key: nil, modifiers: nil, stickyModifiers: nil, text: text, description: description,
                       repeats: repeatConfig != nil ? true : nil,
                       repeatDelay: repeatConfig?.delay, repeatInterval: repeatConfig?.interval,
                       trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
@@ -135,6 +141,12 @@ extension ActionConfig {
                 return nil
             }
             return .keystroke(key: key, modifiers: modifiers ?? [])
+        case "stickyKeystroke":
+            guard let key, KeyboardEmitter.keyCodeMap[key] != nil else {
+                print("[VibePad] Config: unknown key \"\(key ?? "<nil>")\"")
+                return nil
+            }
+            return .stickyKeystroke(key: key, modifiers: modifiers ?? [], stickyModifiers: stickyModifiers ?? [])
         case "typeText":
             guard let text else {
                 print("[VibePad] Config: typeText action missing text")

@@ -8,6 +8,7 @@ import Foundation
 
 enum MappedAction: Equatable {
     case keystroke(key: String, modifiers: [String])
+    case stickyKeystroke(key: String, modifiers: [String], stickyModifiers: [String])
     case typeText(String)
 }
 
@@ -53,10 +54,18 @@ final class InputMapper {
 
     static let l1Mappings: [GamepadButton: MappedAction] = [
         .buttonB:              .keystroke(key: "delete", modifiers: []),                  // L1+○ Delete
+        .dpadLeft:             .stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"]),  // L1+← Prev app
+        .dpadRight:            .stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"]),               // L1+→ Next app
+        .dpadUp:               .keystroke(key: "upArrow", modifiers: ["control"]),        // L1+↑ Mission Control
+        .dpadDown:             .keystroke(key: "downArrow", modifiers: ["control"]),      // L1+↓ App Exposé
     ]
 
     static let l1Descriptions: [GamepadButton: String] = [
         .buttonB:       "Delete",
+        .dpadLeft:      "Prev App",
+        .dpadRight:     "Next App",
+        .dpadUp:        "Mission Control",
+        .dpadDown:      "App Windows",
     ]
 
     // MARK: - Default repeat configs
@@ -111,6 +120,7 @@ final class InputMapper {
     private let activeL1TriggerModes: [GamepadButton: TriggerMode]
     private var heldRepeatButtons: [GamepadButton: (lastFire: CFAbsoluteTime, isL1: Bool)] = [:]
     private var repeatTimer: Timer?
+    private var heldStickyModifiers: Set<String> = []
 
     // MARK: - Arrow key hold state (left stick)
 
@@ -185,6 +195,8 @@ final class InputMapper {
                     heldRepeatButtons.removeValue(forKey: btn)
                 }
                 if heldRepeatButtons.isEmpty { stopRepeatTimer() }
+                // Release any sticky modifiers (e.g. Cmd from app switching)
+                releaseStickyModifiers()
             }
             return
         }
@@ -220,6 +232,14 @@ final class InputMapper {
 
         if shouldFire {
             guard let action else { return }
+            // If switching from sticky to non-sticky action while L1 held, release sticky modifiers first
+            if usingL1 && !heldStickyModifiers.isEmpty {
+                if case .stickyKeystroke = action {
+                    // Same sticky family — keep modifiers held
+                } else {
+                    releaseStickyModifiers()
+                }
+            }
             let description = usingL1 ? activeL1Descriptions[button] : activeDescriptions[button]
             onAction?(button, action, description)
             fireAction(action)
@@ -242,9 +262,24 @@ final class InputMapper {
         switch action {
         case .keystroke(let key, let modifiers):
             emitter.postKeystroke(key: key, modifiers: modifiers)
+        case .stickyKeystroke(let key, let modifiers, let stickyModifiers):
+            // Hold sticky modifiers that aren't already held
+            for mod in stickyModifiers where !heldStickyModifiers.contains(mod) {
+                emitter.holdModifier(mod)
+                heldStickyModifiers.insert(mod)
+            }
+            // Fire keystroke with combined modifiers (sticky + per-keystroke)
+            emitter.postKeystroke(key: key, modifiers: modifiers + stickyModifiers)
         case .typeText(let text):
             emitter.typeText(text)
         }
+    }
+
+    private func releaseStickyModifiers() {
+        for mod in heldStickyModifiers {
+            emitter.releaseModifier(mod)
+        }
+        heldStickyModifiers.removeAll()
     }
 
     // MARK: - Button repeat timer

@@ -115,6 +115,25 @@ final class KeyboardEmitter {
         up.post(tap: .cghidEventTap)
     }
 
+    // MARK: - Modifier hold / release (for sticky modifiers like Cmd during app switching)
+
+    static let modifierKeyCodes: [String: CGKeyCode] = [
+        "command": 0x37, "shift": 0x38, "option": 0x3A, "control": 0x3B,
+    ]
+
+    func holdModifier(_ modifier: String) {
+        guard let keyCode = Self.modifierKeyCodes[modifier] else { return }
+        guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else { return }
+        event.flags = Self.modifierFlags(from: [modifier])
+        event.post(tap: .cghidEventTap)
+    }
+
+    func releaseModifier(_ modifier: String) {
+        guard let keyCode = Self.modifierKeyCodes[modifier] else { return }
+        guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false) else { return }
+        event.post(tap: .cghidEventTap)
+    }
+
     // MARK: - Key down / up (for held keys like arrows)
 
     func postKeyDown(keyCode: CGKeyCode) {

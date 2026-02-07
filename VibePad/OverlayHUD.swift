@@ -108,6 +108,10 @@ final class OverlayHUD {
             let mods = modifiers.map { modifierSymbols[$0] ?? $0 }.joined()
             let keyName = keyDisplayNames[key] ?? key
             return mods + keyName
+        case .stickyKeystroke(let key, let modifiers, let stickyModifiers):
+            let allMods = (stickyModifiers + modifiers).map { modifierSymbols[$0] ?? $0 }.joined()
+            let keyName = keyDisplayNames[key] ?? key
+            return allMods + keyName
         case .typeText(let text):
             return text
         }
