@@ -25,13 +25,10 @@ Optimized for Claude Code and terminal workflows.
 | **D-pad ↑↓** | Command history | `↑` / `↓` |
 | **D-pad ←→** | Switch tabs | `Cmd+Shift+[` / `]` |
 | **L1 (hold)** | Modifier layer | See L1 layer below |
-| **R1** | Autocomplete | `Tab` |
-| **L2** | Voice (future) | `Option+Space` |
+| **R1** | Mode switch | `Shift+Tab` |
+| **L2** | Voice input | `Option+Space` |
 | **R2** | Submit | `Return` |
-| **L3 (stick click)** | Reverse search | `Ctrl+R` |
-| **R3 (stick click)** | Clear screen | `Ctrl+L` |
-| **Menu** | Ship it | types `/commit` + Enter |
-| **Options** | Help | types `/help` + Enter |
+| **Menu** | Slash command | Types `/` |
 | **Left Stick** | Arrow keys | Arrow keys (with deadzone) |
 | **Right Stick** | Scroll | Scroll viewport |
 
@@ -39,10 +36,7 @@ Optimized for Claude Code and terminal workflows.
 
 | Button | Action | Output |
 |--------|--------|--------|
-| **A** | Compact context | types `/compact` + Enter |
-| **B** | Undo | `Cmd+Z` |
-| **X** | EOF / exit | `Ctrl+D` |
-| **Y** | Review changes | types `/review` + Enter |
+| **B** | Delete | `Delete` (hold to repeat) |
 
 ## Custom Mappings
 
@@ -55,18 +49,17 @@ VibePad writes its default config to `~/.vibepad/config.json` on first launch. E
   "mappings": {
     "buttonA": { "type": "keystroke", "key": "return", "modifiers": [] },
     "buttonX": { "type": "keystroke", "key": "c", "modifiers": ["control"] },
-    "buttonMenu": { "type": "typeText", "text": "/commit\n" }
+    "buttonMenu": { "type": "typeText", "text": "/" }
   },
   "l1Mappings": {
-    "buttonA": { "type": "typeText", "text": "/compact\n" },
-    "buttonB": { "type": "keystroke", "key": "z", "modifiers": ["command"] }
+    "buttonB": { "type": "keystroke", "key": "delete", "modifiers": [] }
   },
   "stickConfig": {
     "leftStickDeadzone": 0.3,
     "rightStickDeadzone": 0.2,
     "arrowPressThreshold": 0.5,
     "arrowReleaseThreshold": 0.3,
-    "scrollSensitivity": 5.0
+    "scrollSensitivity": 15.0
   }
 }
 ```

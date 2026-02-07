@@ -11,41 +11,25 @@ struct MenuBarPanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: Header
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(.secondary)
-                    Text("VibePad")
-                        .font(.headline)
-                }
-
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(appDelegate.controllerName != nil ? .green : Color(.systemGray))
-                        .frame(width: 8, height: 8)
-                    Text(appDelegate.controllerName ?? "No controller")
-                        .font(.subheadline)
-                        .foregroundStyle(appDelegate.controllerName != nil ? .primary : .secondary)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 12)
+            HeaderRow(appDelegate: appDelegate)
 
             Divider()
 
-            // MARK: Toggles
+            // MARK: Options
             VStack(spacing: 0) {
-                Toggle("Enabled", isOn: $appDelegate.isEnabled)
-                    .toggleStyle(.switch)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                ActionRow(
+                    icon: appDelegate.isHUDEnabled ? "checkmark.square" : "square",
+                    iconColor: appDelegate.isHUDEnabled ? .primary : .secondary,
+                    label: "Learning Mode (hints)"
+                ) {
+                    appDelegate.isHUDEnabled.toggle()
+                }
 
-                Toggle("Show HUD", isOn: $appDelegate.isHUDEnabled)
-                    .toggleStyle(.switch)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                if !appDelegate.launchAtLoginOnStartup {
+                    CheckmarkRow(label: "Launch at Login", isOn: appDelegate.launchAtLogin) {
+                        appDelegate.setLaunchAtLogin(!appDelegate.launchAtLogin)
+                    }
+                }
             }
 
             Divider()
@@ -65,7 +49,7 @@ struct MenuBarPanelView: View {
 
             // MARK: Actions
             VStack(spacing: 0) {
-                ActionRow(icon: "doc.text", label: "Open Config...") {
+                ActionRow(icon: "doc.text", label: "Custom Key Bindings") {
                     NSWorkspace.shared.open(VibePadConfig.configFileURL)
                 }
 
@@ -107,9 +91,93 @@ private struct ActionRow: View {
             .padding(.vertical, 6)
             .contentShape(Rectangle())
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                Rectangle()
                     .fill(isHovering ? Color.primary.opacity(0.1) : .clear)
-                    .padding(.horizontal, 8)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovering = hovering
+        }
+    }
+}
+
+// MARK: - Header Row
+
+private struct HeaderRow: View {
+    @Bindable var appDelegate: AppDelegate
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button {
+            appDelegate.isEnabled.toggle()
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Image(systemName: "gamecontroller.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.secondary)
+                    Text("VibePad")
+                        .font(.headline)
+                    Spacer()
+                    Toggle("", isOn: $appDelegate.isEnabled)
+                        .toggleStyle(.switch)
+                        .labelsHidden()
+                        .allowsHitTesting(false)
+                }
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(appDelegate.controllerName != nil ? .green : Color(.systemGray))
+                        .frame(width: 8, height: 8)
+                    Text(appDelegate.controllerName ?? "No controller")
+                        .font(.subheadline)
+                        .foregroundStyle(appDelegate.controllerName != nil ? .primary : .secondary)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 12)
+            .contentShape(Rectangle())
+            .background(
+                Rectangle()
+                    .fill(isHovering ? Color.primary.opacity(0.1) : .clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovering = hovering
+        }
+    }
+}
+
+// MARK: - Checkmark Row
+
+private struct CheckmarkRow: View {
+    let label: String
+    let isOn: Bool
+    let action: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 20)
+                    .opacity(isOn ? 1 : 0)
+                Text(label)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+            .background(
+                Rectangle()
+                    .fill(isHovering ? Color.primary.opacity(0.1) : .clear)
             )
         }
         .buttonStyle(.plain)

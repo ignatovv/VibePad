@@ -8,6 +8,7 @@
 import Cocoa
 import GameController
 import Observation
+import ServiceManagement
 
 @Observable
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -17,6 +18,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var controllerName: String?
     var isAccessibilityGranted = false
 
+    var launchAtLogin = false
+    private(set) var launchAtLoginOnStartup = false
+
+    func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled { try SMAppService.mainApp.register() }
+            else { try SMAppService.mainApp.unregister() }
+        } catch {
+            print("[VibePad] Launch at Login error: \(error)")
+        }
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+    }
+
     private var gamepadManager: GamepadManager?
     private var inputMapper: InputMapper?
     private var hud: OverlayHUD?
@@ -24,6 +38,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         isAccessibilityGranted = AccessibilityHelper.checkAndPrompt()
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+        launchAtLoginOnStartup = launchAtLogin
         print("[VibePad] Accessibility granted: \(isAccessibilityGranted)")
 
         let (config, existed) = VibePadConfig.load()
@@ -76,6 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self else { return }
             self.controllerName = self.gamepadManager?.connectedControllerName
             self.isAccessibilityGranted = AccessibilityHelper.isTrusted
+            self.launchAtLogin = SMAppService.mainApp.status == .enabled
         }
     }
 }
