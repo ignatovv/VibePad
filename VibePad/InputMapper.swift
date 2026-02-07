@@ -15,6 +15,8 @@ final class InputMapper {
     private let emitter: KeyboardEmitter
     private var isL1Held = false
 
+    var onAction: ((GamepadButton?, MappedAction, String?) -> Void)?
+
     // MARK: - Default mappings (Claude Code / terminal)
 
     static let defaultMappings: [GamepadButton: MappedAction] = [
@@ -37,13 +39,37 @@ final class InputMapper {
 
     // MARK: - L1 layer mappings
 
-    // All L1 combos unassigned — fall through to base layer
-    static let l1Mappings: [GamepadButton: MappedAction] = [:]
+    static let l1Mappings: [GamepadButton: MappedAction] = [
+        .buttonB:              .keystroke(key: "delete", modifiers: []),                  // L1+○ Delete
+    ]
+
+    static let l1Descriptions: [GamepadButton: String] = [
+        .buttonB:       "Delete",
+    ]
+
+    // MARK: - Default descriptions
+
+    static let defaultDescriptions: [GamepadButton: String] = [
+        .buttonA:       "Accept",
+        .buttonB:       "Cancel",
+        .buttonX:       "Interrupt",
+        .buttonY:       "Paste",
+        .dpadUp:        "History Up",
+        .dpadDown:      "History Down",
+        .dpadLeft:      "Prev Tab",
+        .dpadRight:     "Next Tab",
+        .rightShoulder: "Switch Mode",
+        .leftTrigger:   "Voice Input",
+        .rightTrigger:  "Submit",
+        .buttonMenu:    "Slash Command",
+    ]
 
     // MARK: - Active mappings (from config or defaults)
 
     private let activeMappings: [GamepadButton: MappedAction]
     private let activeL1Mappings: [GamepadButton: MappedAction]
+    private let activeDescriptions: [GamepadButton: String]
+    private let activeL1Descriptions: [GamepadButton: String]
 
     // MARK: - Arrow key hold state (left stick)
 
@@ -74,6 +100,8 @@ final class InputMapper {
         self.emitter = emitter
         self.activeMappings = Self.defaultMappings
         self.activeL1Mappings = Self.l1Mappings
+        self.activeDescriptions = Self.defaultDescriptions
+        self.activeL1Descriptions = Self.l1Descriptions
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
@@ -81,8 +109,10 @@ final class InputMapper {
 
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
         self.emitter = emitter
-        self.activeMappings = config.mappings.toButtonMappings()
-        self.activeL1Mappings = config.l1Mappings?.toButtonMappings() ?? [:]
+        self.activeMappings = Self.defaultMappings.merging(config.mappings.toButtonMappings()) { _, new in new }
+        self.activeL1Mappings = Self.l1Mappings.merging(config.l1Mappings?.toButtonMappings() ?? [:]) { _, new in new }
+        self.activeDescriptions = Self.defaultDescriptions.merging(config.mappings.toButtonDescriptions()) { _, new in new }
+        self.activeL1Descriptions = Self.l1Descriptions.merging(config.l1Mappings?.toButtonDescriptions() ?? [:]) { _, new in new }
         let stick = config.stickConfig
         self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
@@ -103,6 +133,8 @@ final class InputMapper {
             : activeMappings[button]
 
         guard let action else { return }
+        let description = isL1Held ? (activeL1Descriptions[button] ?? activeDescriptions[button]) : activeDescriptions[button]
+        onAction?(button, action, description)
         switch action {
         case .keystroke(let key, let modifiers):
             emitter.postKeystroke(key: key, modifiers: modifiers)
@@ -117,31 +149,38 @@ final class InputMapper {
         updateArrow(
             axis: y, held: &arrowUpHeld, lastFire: &arrowUpLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["upArrow"]!,
-            positive: true
+            positive: true,
+            action: .keystroke(key: "upArrow", modifiers: []), description: "Move Up"
         )
         updateArrow(
             axis: y, held: &arrowDownHeld, lastFire: &arrowDownLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["downArrow"]!,
-            positive: false
+            positive: false,
+            action: .keystroke(key: "downArrow", modifiers: []), description: "Move Down"
         )
         updateArrow(
             axis: x, held: &arrowRightHeld, lastFire: &arrowRightLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["rightArrow"]!,
-            positive: true
+            positive: true,
+            action: .keystroke(key: "rightArrow", modifiers: []), description: "Move Right"
         )
         updateArrow(
             axis: x, held: &arrowLeftHeld, lastFire: &arrowLeftLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["leftArrow"]!,
-            positive: false
+            positive: false,
+            action: .keystroke(key: "leftArrow", modifiers: []), description: "Move Left"
         )
     }
 
-    private func updateArrow(axis: Float, held: inout Bool, lastFire: inout CFAbsoluteTime, keyCode: CGKeyCode, positive: Bool) {
+    private func updateArrow(axis: Float, held: inout Bool, lastFire: inout CFAbsoluteTime,
+                             keyCode: CGKeyCode, positive: Bool,
+                             action: MappedAction, description: String) {
         let value = positive ? axis : -axis
         let now = CFAbsoluteTimeGetCurrent()
 
         if !held && value > arrowPressThreshold {
             held = true
+            onAction?(nil, action, description)
             emitter.postKeystroke(keyCode: keyCode)
             lastFire = now
         } else if held && value >= arrowReleaseThreshold {

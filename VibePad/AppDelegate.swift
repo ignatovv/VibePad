@@ -13,11 +13,13 @@ import Observation
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var isEnabled = true
+    var isHUDEnabled = true
     var controllerName: String?
     var isAccessibilityGranted = false
 
     private var gamepadManager: GamepadManager?
     private var inputMapper: InputMapper?
+    private var hud: OverlayHUD?
     private var statusTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -36,6 +38,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             leftStickDeadzone: stickConfig?.leftStickDeadzone ?? 0.3,
             rightStickDeadzone: stickConfig?.rightStickDeadzone ?? 0.2
         )
+
+        let hud = OverlayHUD()
+        self.hud = hud
+
+        mapper.onAction = { [weak self] _, action, description in
+            guard let self, self.isHUDEnabled else { return }
+            hud.show(action: action, description: description)
+        }
 
         manager.onButtonPressed = { [weak self] button, pressed in
             guard let self, self.isEnabled else {

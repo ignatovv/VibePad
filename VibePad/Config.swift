@@ -18,6 +18,7 @@ struct ActionConfig: Codable, Sendable {
     var key: String?          // for keystroke
     var modifiers: [String]?  // for keystroke
     var text: String?         // for typeText
+    var description: String?  // human-readable label for HUD
 }
 
 struct StickConfig: Codable, Sendable {
@@ -81,10 +82,10 @@ extension VibePadConfig {
             version: 1,
             profile: "claude-code",
             mappings: InputMapper.defaultMappings.reduce(into: [:]) { dict, pair in
-                dict[pair.key.rawValue] = ActionConfig(from: pair.value)
+                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key])
             },
             l1Mappings: InputMapper.l1Mappings.reduce(into: [:]) { dict, pair in
-                dict[pair.key.rawValue] = ActionConfig(from: pair.value)
+                dict[pair.key.rawValue] = ActionConfig(from: pair.value, description: InputMapper.defaultDescriptions[pair.key])
             },
             stickConfig: StickConfig(
                 leftStickDeadzone: 0.3,
@@ -101,12 +102,12 @@ extension VibePadConfig {
 
 extension ActionConfig {
 
-    init(from action: MappedAction) {
+    init(from action: MappedAction, description: String? = nil) {
         switch action {
         case .keystroke(let key, let modifiers):
-            self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil)
+            self.init(type: "keystroke", key: key, modifiers: modifiers, text: nil, description: description)
         case .typeText(let text):
-            self.init(type: "typeText", key: nil, modifiers: nil, text: text)
+            self.init(type: "typeText", key: nil, modifiers: nil, text: text, description: description)
         }
     }
 
@@ -146,6 +147,16 @@ extension Dictionary where Key == String, Value == ActionConfig {
                 continue
             }
             result[button] = action
+        }
+        return result
+    }
+
+    func toButtonDescriptions() -> [GamepadButton: String] {
+        var result: [GamepadButton: String] = [:]
+        for (name, actionConfig) in self {
+            guard let button = GamepadButton(rawValue: name),
+                  let desc = actionConfig.description else { continue }
+            result[button] = desc
         }
         return result
     }

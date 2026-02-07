@@ -35,11 +35,18 @@ struct MenuBarPanelView: View {
 
             Divider()
 
-            // MARK: Toggle
-            Toggle("Enabled", isOn: $appDelegate.isEnabled)
-                .toggleStyle(.switch)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+            // MARK: Toggles
+            VStack(spacing: 0) {
+                Toggle("Enabled", isOn: $appDelegate.isEnabled)
+                    .toggleStyle(.switch)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                Toggle("Show HUD", isOn: $appDelegate.isHUDEnabled)
+                    .toggleStyle(.switch)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+            }
 
             Divider()
 
