@@ -210,7 +210,7 @@ CGEvent injection requires Accessibility permission. The app must:
 
 - **Custom mapping UI** — visual controller layout where you click a button and assign a shortcut
 - **Multiple profiles** — switch between "Vibe Mode", "Git Mode", "Debug Mode"
-- **Built-in voice-to-text** — integrate Whisper.cpp locally for zero-latency voice prompts
+- **Built-in voice-to-text** — capture audio from DualSense mic via AVAudioEngine, run through Whisper.cpp locally for zero-latency voice prompts (no external dictation app needed)
 - **Haptic feedback** — DualSense adaptive triggers (rumble on build fail, pulse on success)
 - **Stream overlay** — OBS-compatible overlay showing controller inputs for Twitch
 - **Combo macros** — L1+X = custom multi-step action

@@ -5,34 +5,43 @@
 
 import CoreGraphics
 
-struct KeyMapping {
-    let key: String
-    let modifiers: [String]
+enum MappedAction {
+    case keystroke(key: String, modifiers: [String])
+    case typeText(String)
 }
 
 final class InputMapper {
 
     private let emitter: KeyboardEmitter
+    private var isL1Held = false
 
-    // MARK: - Default mappings (from spec)
+    // MARK: - Default mappings (Claude Code / terminal)
 
-    static let defaultMappings: [GamepadButton: KeyMapping] = [
-        .buttonA:              KeyMapping(key: "return", modifiers: []),
-        .buttonB:              KeyMapping(key: "escape", modifiers: []),
-        .buttonY:              KeyMapping(key: "l", modifiers: ["command"]),
-        .buttonX:              KeyMapping(key: "s", modifiers: ["command"]),
-        .dpadUp:               KeyMapping(key: "upArrow", modifiers: []),
-        .dpadDown:             KeyMapping(key: "downArrow", modifiers: []),
-        .dpadLeft:             KeyMapping(key: "leftBracket", modifiers: ["command", "shift"]),
-        .dpadRight:            KeyMapping(key: "rightBracket", modifiers: ["command", "shift"]),
-        .leftShoulder:         KeyMapping(key: "grave", modifiers: ["command"]),
-        .rightShoulder:        KeyMapping(key: "p", modifiers: ["command", "shift"]),
-        .leftTrigger:          KeyMapping(key: "space", modifiers: ["option"]),
-        .rightTrigger:         KeyMapping(key: "return", modifiers: ["command"]),
-        .leftThumbstickButton: KeyMapping(key: "b", modifiers: ["command"]),
-        .rightThumbstickButton: KeyMapping(key: "grave", modifiers: ["control"]),
-        .buttonMenu:           KeyMapping(key: "g", modifiers: ["command", "shift"]),
-        .buttonOptions:        KeyMapping(key: "period", modifiers: ["command"]),
+    static let defaultMappings: [GamepadButton: MappedAction] = [
+        .buttonA:              .typeText("y\n"),                                      // Accept tool use
+        .buttonB:              .typeText("n\n"),                                      // Reject tool use
+        .buttonX:              .keystroke(key: "c", modifiers: ["control"]),           // Ctrl+C interrupt
+        .buttonY:              .keystroke(key: "v", modifiers: ["command"]),           // ⌘V paste
+        .dpadUp:               .keystroke(key: "upArrow", modifiers: []),              // Command history
+        .dpadDown:             .keystroke(key: "downArrow", modifiers: []),            // Command history
+        .dpadLeft:             .keystroke(key: "leftBracket", modifiers: ["command", "shift"]),  // Prev tab
+        .dpadRight:            .keystroke(key: "rightBracket", modifiers: ["command", "shift"]), // Next tab
+        .rightShoulder:        .keystroke(key: "tab", modifiers: []),                  // Shell autocomplete
+        .leftTrigger:          .keystroke(key: "space", modifiers: ["option"]),        // Voice (future)
+        .rightTrigger:         .keystroke(key: "return", modifiers: []),               // Submit / Enter
+        .leftThumbstickButton: .keystroke(key: "r", modifiers: ["control"]),           // Ctrl+R reverse search
+        .rightThumbstickButton: .keystroke(key: "l", modifiers: ["control"]),          // Ctrl+L clear screen
+        .buttonMenu:           .typeText("/commit\n"),                                 // Ship it
+        .buttonOptions:        .typeText("/help\n"),                                   // Quick reference
+    ]
+
+    // MARK: - L1 layer mappings
+
+    static let l1Mappings: [GamepadButton: MappedAction] = [
+        .buttonA: .typeText("/compact\n"),                          // Compact context
+        .buttonB: .keystroke(key: "z", modifiers: ["command"]),     // Undo
+        .buttonX: .keystroke(key: "d", modifiers: ["control"]),     // EOF / exit
+        .buttonY: .typeText("/review\n"),                           // Review changes
     ]
 
     // MARK: - Arrow key hold state (left stick)
@@ -58,9 +67,23 @@ final class InputMapper {
     // MARK: - Button handling
 
     func handleButton(_ button: GamepadButton, pressed: Bool) {
+        if button == .leftShoulder {
+            isL1Held = pressed
+            return
+        }
         guard pressed else { return }
-        guard let mapping = Self.defaultMappings[button] else { return }
-        emitter.postKeystroke(key: mapping.key, modifiers: mapping.modifiers)
+
+        let action = isL1Held
+            ? Self.l1Mappings[button] ?? Self.defaultMappings[button]
+            : Self.defaultMappings[button]
+
+        guard let action else { return }
+        switch action {
+        case .keystroke(let key, let modifiers):
+            emitter.postKeystroke(key: key, modifiers: modifiers)
+        case .typeText(let text):
+            emitter.typeText(text)
+        }
     }
 
     // MARK: - Left stick → arrow keys

@@ -86,6 +86,27 @@ final class KeyboardEmitter {
         up.post(tap: .cghidEventTap)
     }
 
+    // MARK: - Type text (string of characters)
+
+    private static let charToKeyName: [Character: String] = [
+        "/": "slash", " ": "space", "\t": "tab",
+        "`": "grave", "-": "minus", "=": "equal",
+        "[": "leftBracket", "]": "rightBracket", "\\": "backslash",
+        ";": "semicolon", "'": "quote", ",": "comma", ".": "period",
+    ]
+
+    func typeText(_ text: String) {
+        for ch in text {
+            if ch == "\n" {
+                postKeystroke(key: "return")
+            } else if let keyName = Self.charToKeyName[ch] {
+                postKeystroke(key: keyName)
+            } else if Self.keyCodeMap[String(ch)] != nil {
+                postKeystroke(key: String(ch))
+            }
+        }
+    }
+
     // MARK: - Key down / up (for held keys like arrows)
 
     func postKeyDown(keyCode: CGKeyCode) {
