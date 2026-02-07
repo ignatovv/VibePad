@@ -12,31 +12,17 @@ A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts 
 - Visual HUD overlay showing button actions
 - Menu bar controls with enable/disable toggle
 
-## Default Mapping
+## Button Mapping
 
-Optimized for Claude Code and terminal workflows.
+> [View interactive layout on PadCrafter](https://www.padcrafter.com/?templates=VibePad(Default%2CL1+Layer+(Hold+L1)))
 
-| Button | Action | Output |
-|--------|--------|--------|
-| **X / A** | Accept/Confirm | `Return` |
-| **O / B** | Cancel/Back | `Escape` |
-| **□ / X** | Interrupt | `Ctrl+C` |
-| **△ / Y** | Paste | `Cmd+V` |
-| **D-pad ↑↓** | Command history | `↑` / `↓` |
-| **D-pad ←→** | Switch tabs | `Cmd+Shift+[` / `]` |
-| **L1 (hold)** | Modifier layer | See L1 layer below |
-| **R1** | Mode switch | `Shift+Tab` |
-| **L2** | Voice input | `Option+Space` |
-| **R2** | Submit | `Return` |
-| **Menu** | Slash command | Types `/` |
-| **Left Stick** | Arrow keys | Arrow keys (with deadzone) |
-| **Right Stick** | Scroll | Scroll viewport |
+### Default Layer
 
-### L1 Layer (hold L1 + press)
+<img src="docs/vibepad-layout.png" alt="VibePad default layer" width="600">
 
-| Button | Action | Output |
-|--------|--------|--------|
-| **B** | Delete | `Delete` (hold to repeat) |
+### L1 Layer (Hold L1)
+
+<img src="docs/vibepad-l1-layout.png" alt="VibePad L1 layer" width="600">
 
 ## Custom Mappings
 
