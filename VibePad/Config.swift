@@ -36,13 +36,13 @@ extension VibePadConfig {
         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".vibepad")
     }
 
-    private static var configFilePath: URL {
+    static var configFileURL: URL {
         configDirectory.appendingPathComponent("config.json")
     }
 
     /// Load config from disk. Returns (config, existed) where `existed` is false if the file was missing.
     static func load() -> (config: VibePadConfig, existed: Bool) {
-        let path = configFilePath
+        let path = configFileURL
         guard FileManager.default.fileExists(atPath: path.path) else {
             print("[VibePad] No config file at \(path.path), using defaults")
             return (defaultConfig(), false)
@@ -68,8 +68,8 @@ extension VibePadConfig {
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(config)
-            try data.write(to: configFilePath, options: .atomic)
-            print("[VibePad] Wrote default config to \(configFilePath.path)")
+            try data.write(to: configFileURL, options: .atomic)
+            print("[VibePad] Wrote default config to \(configFileURL.path)")
         } catch {
             print("[VibePad] Failed to write config: \(error)")
         }
