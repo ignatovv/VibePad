@@ -110,10 +110,6 @@ final class GamepadManager {
             case gamepad.buttonB:               button = .buttonB
             case gamepad.buttonX:               button = .buttonX
             case gamepad.buttonY:               button = .buttonY
-            case gamepad.dpad.up:               button = .dpadUp
-            case gamepad.dpad.down:             button = .dpadDown
-            case gamepad.dpad.left:             button = .dpadLeft
-            case gamepad.dpad.right:            button = .dpadRight
             case gamepad.leftShoulder:          button = .leftShoulder
             case gamepad.rightShoulder:         button = .rightShoulder
             case gamepad.leftThumbstickButton:  button = .leftThumbstickButton
@@ -128,6 +124,23 @@ final class GamepadManager {
                 print("[VibePad] Button: \(button.rawValue) pressed=\(pressed)")
                 DispatchQueue.main.async {
                     self.onButtonPressed?(button, pressed)
+                }
+            }
+        }
+
+        // D-pad: register individual handlers since some controllers (e.g. DualSense)
+        // report the dpad as a single GCControllerDirectionPad element
+        let dpadMappings: [(GCControllerButtonInput, GamepadButton)] = [
+            (gp.dpad.up, .dpadUp),
+            (gp.dpad.down, .dpadDown),
+            (gp.dpad.left, .dpadLeft),
+            (gp.dpad.right, .dpadRight),
+        ]
+        for (input, button) in dpadMappings {
+            input.pressedChangedHandler = { [weak self] _, _, pressed in
+                print("[VibePad] Button: \(button.rawValue) pressed=\(pressed)")
+                DispatchQueue.main.async {
+                    self?.onButtonPressed?(button, pressed)
                 }
             }
         }

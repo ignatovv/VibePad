@@ -18,8 +18,8 @@ final class InputMapper {
     // MARK: - Default mappings (Claude Code / terminal)
 
     static let defaultMappings: [GamepadButton: MappedAction] = [
-        .buttonA:              .typeText("y\n"),                                      // Accept tool use
-        .buttonB:              .typeText("n\n"),                                      // Reject tool use
+        .buttonA:              .keystroke(key: "return", modifiers: []),                // Accept/confirm (Enter)
+        .buttonB:              .keystroke(key: "escape", modifiers: []),               // Cancel/back (Escape)
         .buttonX:              .keystroke(key: "c", modifiers: ["control"]),           // Ctrl+C interrupt
         .buttonY:              .keystroke(key: "v", modifiers: ["command"]),           // ⌘V paste
         .dpadUp:               .keystroke(key: "upArrow", modifiers: []),              // Command history
