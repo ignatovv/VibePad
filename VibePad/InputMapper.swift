@@ -44,9 +44,9 @@ final class InputMapper {
         .leftTrigger:          .keystroke(key: "space", modifiers: ["option"]),        // Voice (future)
         .rightTrigger:         .keystroke(key: "return", modifiers: []),               // Submit / Enter
         // L3 (.leftThumbstickButton) — unassigned
-        // R3 (.rightThumbstickButton) — unassigned
+        .rightThumbstickButton:.keystroke(key: "tab", modifiers: []),                  // R3 Tab (complete)
         .buttonMenu:           .typeText("/"),                                           // Slash command prefix
-        // Options (.buttonOptions) — unassigned, reserved for future use
+        // Options (.buttonOptions) — unassigned
     ]
 
     // MARK: - L1 layer mappings
@@ -89,6 +89,7 @@ final class InputMapper {
         .rightShoulder: "Switch Mode",
         .leftTrigger:   "Voice Input",
         .rightTrigger:  "Submit",
+        .rightThumbstickButton: "Autocomplete",
         .buttonMenu:    "Slash Command",
     ]
 
@@ -189,17 +190,26 @@ final class InputMapper {
         }
 
         let usingL1 = isL1Held
+
+        // L1 held but no L1 mapping → show "coming soon" HUD on press, block fallthrough
+        if usingL1 && activeL1Mappings[button] == nil {
+            if pressed {
+                onAction?(button, .typeText("Customizable — coming soon"), nil)
+            }
+            return
+        }
+
         let action = usingL1
-            ? activeL1Mappings[button] ?? activeMappings[button]
+            ? activeL1Mappings[button]
             : activeMappings[button]
 
         let repeatConfig = usingL1
-            ? activeL1RepeatConfigs[button] ?? activeRepeatConfigs[button]
+            ? activeL1RepeatConfigs[button]
             : activeRepeatConfigs[button]
 
         let triggerMode = usingL1
-            ? activeL1TriggerModes[button] ?? activeTriggerModes[button] ?? .onPress
-            : activeTriggerModes[button] ?? .onPress
+            ? (activeL1TriggerModes[button] ?? .onPress)
+            : (activeTriggerModes[button] ?? .onPress)
 
         let shouldFire: Bool
         switch triggerMode {
@@ -210,7 +220,7 @@ final class InputMapper {
 
         if shouldFire {
             guard let action else { return }
-            let description = usingL1 ? (activeL1Descriptions[button] ?? activeDescriptions[button]) : activeDescriptions[button]
+            let description = usingL1 ? activeL1Descriptions[button] : activeDescriptions[button]
             onAction?(button, action, description)
             fireAction(action)
         }
@@ -256,7 +266,7 @@ final class InputMapper {
         for (button, state) in heldRepeatButtons {
             let usingL1 = state.isL1
             let repeatCfg = usingL1
-                ? activeL1RepeatConfigs[button] ?? activeRepeatConfigs[button]
+                ? activeL1RepeatConfigs[button]
                 : activeRepeatConfigs[button]
             guard let repeatCfg else { continue }
 
@@ -264,7 +274,7 @@ final class InputMapper {
             let threshold = elapsed < repeatCfg.delay + repeatCfg.interval ? repeatCfg.delay : repeatCfg.interval
             if elapsed >= threshold {
                 let action = usingL1
-                    ? activeL1Mappings[button] ?? activeMappings[button]
+                    ? activeL1Mappings[button]
                     : activeMappings[button]
                 if let action { fireAction(action) }
                 heldRepeatButtons[button] = (lastFire: now, isL1: usingL1)
