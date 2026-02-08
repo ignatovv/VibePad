@@ -9,7 +9,7 @@ import SwiftUI
 // MARK: - Shortcut Recorder State
 
 @Observable
-private final class ShortcutRecorderState {
+final class ShortcutRecorderState {
     var key: String
     var modifiers: [String]  // macOS-standard order
     var isRecording = false
@@ -108,7 +108,7 @@ private final class ShortcutRecorderState {
 
 // MARK: - Keyable Panel (borderless panel that accepts key input)
 
-private final class KeyablePanel: NSPanel {
+final class KeyablePanel: NSPanel {
     override var canBecomeKey: Bool { true }
 }
 
@@ -196,6 +196,50 @@ final class VoiceShortcutPicker {
     }
 }
 
+// MARK: - Reusable Shortcut Recorder Field
+
+struct ShortcutRecorderField: View {
+    @Bindable var recorder: ShortcutRecorderState
+
+    var body: some View {
+        Button {
+            recorder.startRecording()
+        } label: {
+            VStack(spacing: 6) {
+                if recorder.isRecording {
+                    Text("Press a shortcut\u{2026}")
+                        .font(.system(size: 20, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(recorder.label)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(recorder.isRecording ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.04))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(recorder.isRecording ? Color.accentColor : Color.primary.opacity(0.15), lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+
+        if !recorder.isRecording {
+            Text("Click to record a new shortcut")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+        } else {
+            Text("Press any key combination\u{2026}")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
 // MARK: - SwiftUI Picker View
 
 private struct VoiceShortcutPickerView: View {
@@ -205,48 +249,11 @@ private struct VoiceShortcutPickerView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Title
-            Text("Voice Shortcut")
+            Text("Voice-to-text Shortcut")
                 .font(.system(size: 16, weight: .semibold))
 
-            // Shortcut recorder field
-            Button {
-                recorder.startRecording()
-            } label: {
-                VStack(spacing: 6) {
-                    if recorder.isRecording {
-                        Text("Press a shortcut\u{2026}")
-                            .font(.system(size: 20, weight: .medium, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(recorder.label)
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(recorder.isRecording ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.04))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(recorder.isRecording ? Color.accentColor : Color.primary.opacity(0.15), lineWidth: 1.5)
-                )
-            }
-            .buttonStyle(.plain)
+            ShortcutRecorderField(recorder: recorder)
 
-            if !recorder.isRecording {
-                Text("Click to record a new shortcut")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-            } else {
-                Text("Press any key combination\u{2026}")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-
-            // Buttons
             HStack(spacing: 16) {
                 Button("Cancel") { onSkip() }
                     .buttonStyle(.plain)

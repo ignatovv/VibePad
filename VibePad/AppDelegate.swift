@@ -49,15 +49,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var inputMapper: InputMapper?
     private var hud: OverlayHUD?
     private var voiceShortcutPicker: VoiceShortcutPicker?
+    private var onboardingWizard: OnboardingWizard?
     private var statusTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        isAccessibilityGranted = AccessibilityHelper.checkAndPrompt()
+        let config = VibePadConfig.load()
+
+        // Only prompt for accessibility on subsequent launches; wizard handles first launch
+        if config != nil {
+            isAccessibilityGranted = AccessibilityHelper.checkAndPrompt()
+        } else {
+            isAccessibilityGranted = AccessibilityHelper.isTrusted
+        }
         launchAtLogin = SMAppService.mainApp.status == .enabled
         launchAtLoginOnStartup = launchAtLogin
         print("[VibePad] Accessibility granted: \(isAccessibilityGranted)")
-
-        let config = VibePadConfig.load()
         let emitter = KeyboardEmitter()
 
         // Detect voice app only on first launch (no config yet)
@@ -93,25 +99,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 voiceHotkeyLabel = OverlayHUD.label(for: action)
             }
         } else {
-            // First launch — show picker after 1s delay
+            // First launch — show onboarding wizard after 1s delay
             let prefillAction = detectedVoiceApp?.action ?? .keystroke(key: "space", modifiers: ["option"])
             let detectedName = detectedVoiceApp?.name
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                 guard let self else { return }
-                let picker = VoiceShortcutPicker()
-                self.voiceShortcutPicker = picker
-                picker.show(prefilled: prefillAction) { [weak self] result in
+                let wizard = OnboardingWizard()
+                self.onboardingWizard = wizard
+                wizard.show(prefilled: prefillAction) { [weak self] voiceAction, voiceLabel, launchAtLogin in
                     guard let self else { return }
-                    let (action, label) = result ?? (prefillAction, OverlayHUD.label(for: prefillAction))
-                    self.voiceHotkeyLabel = label
+
+                    // Apply voice shortcut
+                    let finalAction = voiceAction ?? prefillAction
+                    self.voiceHotkeyLabel = voiceLabel ?? OverlayHUD.label(for: finalAction)
+
+                    // Apply launch at login
+                    if launchAtLogin {
+                        self.setLaunchAtLogin(true)
+                    }
+
+                    // Write config
                     if let detectedName {
-                        VibePadConfig.writeCurrentDefaults(voiceOverride: action, voiceAppName: detectedName)
+                        VibePadConfig.writeCurrentDefaults(voiceOverride: finalAction, voiceAppName: detectedName)
                     } else {
-                        VibePadConfig.writeCurrentDefaults(voiceOverride: action)
+                        VibePadConfig.writeCurrentDefaults(voiceOverride: finalAction)
                     }
-                    if result != nil {
-                        self.hud?.show(action: action, description: "Voice Input", duration: 2.0)
-                    }
+
+                    self.onboardingWizard = nil
                 }
             }
         }

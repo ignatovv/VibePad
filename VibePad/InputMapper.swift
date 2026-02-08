@@ -107,7 +107,7 @@ final class InputMapper {
         .dpadLeft:      "Prev Tab",
         .dpadRight:     "Next Tab",
         .rightShoulder: "Switch Mode",
-        .leftTrigger:   "Voice Input",
+        .leftTrigger:   "Voice-to-text",
         .rightTrigger:  "Submit",
         .leftThumbstickButton:  "Right Click",
         .rightThumbstickButton: "Left Click",

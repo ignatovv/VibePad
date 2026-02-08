@@ -36,14 +36,14 @@ struct MenuBarPanelView: View {
                 if let hotkey = appDelegate.voiceHotkeyLabel {
                     ActionRow(
                         icon: "mic.fill",
-                        label: "Voice Input (\(hotkey))"
+                        label: "Voice-to-text (\(hotkey))"
                     ) {
                         appDelegate.showVoiceShortcutPicker()
                     }
                 } else {
                     ActionRow(
                         icon: "mic",
-                        label: "Voice Input: Set Up"
+                        label: "Voice-to-text: Set Up"
                     ) {
                         appDelegate.showVoiceShortcutPicker()
                     }
