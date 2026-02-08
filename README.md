@@ -1,6 +1,6 @@
 # VibePad
 
-> Ship code from your couch. A macOS menu bar app that turns your gamepad into a vibe coding controller.
+> 🛋️ Ship code from your couch. Control your AI coding assistant with a gamepad 🎮
 
 A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts optimized for AI-assisted development in VS Code, Cursor, and terminal.
 
