@@ -1,36 +1,45 @@
 # VibePad
 
-> 🛋️ Ship code from your couch. Control your AI coding assistant with a gamepad 🎮
+> Ship code from your couch. Control your AI coding assistant with a gamepad.
 
-A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts optimized for AI-assisted development in VS Code, Cursor, and terminal.
+Lean back, grab your PS5 controller, and ship code. VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development in Cursor, VS Code, and terminal.
 
-## Features
+Accept AI suggestions, scroll through code, switch apps, dictate with voice — all without touching your keyboard.
 
-- **Smart Paste** — clipboard-aware: sends Ctrl+V for images (Claude Code terminal), Cmd+V for text
-- **Two-layer mapping** — default layer + L1 modifier layer doubles your button count
-- **Sticky modifiers** — L1+D-pad app switching holds Cmd across multiple presses, releases on L1 up
-- **Left stick → arrow keys** — with hysteresis thresholds and hold-to-repeat
-- **Right stick → scroll** — continuous smooth scrolling in any direction
-- **L1+left stick → app switch** — flick right for next app, left for previous
-- **L1+right stick → mouse cursor** — move the mouse pointer with the right stick
-- **Hold-to-repeat** — configurable per-button repeat delay and interval
-- **Trigger modes** — fire on press, release, or both (e.g. hold-to-talk for voice input)
-- **HUD overlay** — learning mode shows action labels on every button press
-- **Menu bar app** — status icon, enable/disable toggle, launch at login
-- **JSON config** — full customization of mappings, descriptions, stick tuning at `~/.vibepad/config.json`
-- **Native controller support** — PS5 DualSense, Xbox, and MFi via GameController framework
+<img src="docs/vibepad-layout.png" alt="VibePad default layer — controller mapping diagram" width="700">
 
-## Button Mapping
+<img src="docs/vibepad-l1-layout.png" alt="VibePad L1 layer — hold L1 for extra actions" width="700">
 
 > [View interactive layout on PadCrafter](https://www.padcrafter.com/index.php?templates=VibePad%7CL1%20Layer%20%28Hold%20L1%29&leftTrigger=Voice-to-text&rightTrigger=Submit&leftBumper=Layer%20Modifier%20%28L1%29&rightBumper=Switch%20Mode&aButton=Accept&bButton=Cancel%7CDelete&xButton=Interrupt&yButton=Paste%7CCopy&dpadUp=History%20Up&dpadDown=History%20Down&dpadLeft=Prev%20Tab%7CPrev%20App&dpadRight=Next%20Tab%7CNext%20App&leftStickClick=Right%20Click%7CRight%20Click&rightStickClick=Left%20Click%7CLeft%20Click&startButton=Slash%20Command&backButton=Clear%20Chat&leftStick=Arrow%20Keys%7CPrev%2FNext%20App&rightStick=Scroll%7CMouse%20Cursor)
 
-### Default Layer
+## How It Works
 
-<img src="docs/vibepad-layout.png" alt="VibePad default layer" width="600">
+1. Connect your PS5, Xbox, or MFi controller
+2. VibePad maps buttons to keyboard shortcuts optimized for Cursor / VS Code
+3. Accept AI suggestions, navigate code, switch tabs — all from your controller
 
-### L1 Layer (Hold L1)
+## Features
 
-<img src="docs/vibepad-l1-layout.png" alt="VibePad L1 layer" width="600">
+- **Two-layer mapping** — default layer + L1 modifier layer doubles your button count
+- **Smart Paste** — clipboard-aware: sends Ctrl+V for images (Claude Code terminal), Cmd+V for text
+- **Left stick = arrow keys** — with hysteresis thresholds and hold-to-repeat
+- **Right stick = scroll** — continuous smooth scrolling in any direction
+- **L1+left stick = app switch** — flick right for next app, left for previous
+- **L1+right stick = mouse cursor** — move the pointer without leaving the couch
+- **Hold-to-repeat** — configurable per-button repeat delay and interval
+- **Trigger modes** — fire on press, release, or both (e.g. hold-to-talk for voice input)
+- **Sticky modifiers** — L1+D-pad app switching holds Cmd across multiple presses
+- **HUD overlay** — learning mode shows action labels on every button press
+- **JSON config** — full customization at `~/.vibepad/config.json`
+- **Menu bar app** — status icon, enable/disable toggle, launch at login
+
+## Install
+
+1. Download the latest release from [GitHub Releases](https://github.com/ignatovv/VibePad/releases)
+2. Move **VibePad.app** to Applications
+3. Launch and grant Accessibility permission when prompted
+
+> Accessibility permission is required for keyboard injection — this is how VibePad sends keystrokes to your apps.
 
 ## Custom Mappings
 
@@ -80,16 +89,9 @@ Letters (`a`-`z`), numbers (`0`-`9`), `return`, `escape`, `space`, `tab`, `delet
 - PS5 DualSense, Xbox, or MFi controller
 - Accessibility permission (for keyboard injection)
 
-## Installation
-
-1. Download the latest release
-2. Move VibePad.app to Applications
-3. Launch and grant Accessibility permission when prompted
-
 ## Tech Stack
 
-- Swift 5.9+
-- AppKit (menu bar app)
+- Swift 5.9, AppKit
 - GameController framework
 - CGEvent for keyboard injection
 
