@@ -19,7 +19,7 @@ struct MenuBarPanelView: View {
             VStack(spacing: 0) {
                 ActionRow(
                     icon: appDelegate.isHUDEnabled ? "checkmark.square" : "square",
-                    label: "Learning Mode (hints)"
+                    label: appDelegate.isHUDEnabled ? "Hints On" : "Hints Off"
                 ) {
                     appDelegate.isHUDEnabled.toggle()
                     Analytics.send(Analytics.learningModeToggled, parameters: [
@@ -36,20 +36,11 @@ struct MenuBarPanelView: View {
                     }
                 }
 
-                if let hotkey = appDelegate.voiceHotkeyLabel {
-                    ActionRow(
-                        icon: "mic.fill",
-                        label: "Voice-to-text (\(hotkey))"
-                    ) {
-                        appDelegate.showVoiceShortcutPicker()
-                    }
-                } else {
-                    ActionRow(
-                        icon: "mic",
-                        label: "Voice-to-text: Set Up"
-                    ) {
-                        appDelegate.showVoiceShortcutPicker()
-                    }
+                ActionRow(
+                    icon: appDelegate.voiceHotkeyLabel != nil ? "mic.fill" : "mic",
+                    label: "Change Voice Shortcut"
+                ) {
+                    appDelegate.showVoiceShortcutPicker()
                 }
             }
 
@@ -70,6 +61,10 @@ struct MenuBarPanelView: View {
 
             // MARK: Actions
             VStack(spacing: 0) {
+                ActionRow(icon: "arrow.triangle.2.circlepath", label: "Check for Updates") {
+                    appDelegate.checkForUpdates()
+                }
+
                 ActionRow(icon: "doc.text", label: "Custom Key Bindings") {
                     Analytics.send(Analytics.customConfigOpened)
                     if !FileManager.default.fileExists(atPath: VibePadConfig.configFileURL.path) {
