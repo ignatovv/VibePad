@@ -106,6 +106,8 @@ private struct OnboardingView: View {
 
     @State private var step: OnboardingStep = .welcome
     @State private var voiceSaved = false
+    @State private var showVoiceSuggestion = false
+    @State private var voiceHint: String? = nil
 
     var body: some View {
         VStack(spacing: 16) {
@@ -124,6 +126,8 @@ private struct OnboardingView: View {
         .frame(width: 360, height: 340)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
         .animation(.easeInOut(duration: 0.2), value: step)
+        .animation(.easeInOut(duration: 0.2), value: showVoiceSuggestion)
+        .animation(.easeInOut(duration: 0.2), value: voiceHint)
     }
 
     // MARK: - Welcome
@@ -196,12 +200,29 @@ private struct OnboardingView: View {
 
     private var voiceStep: some View {
         VStack(spacing: 16) {
+            if showVoiceSuggestion {
+                voiceSuggestionView
+            } else {
+                voiceRecorderView
+            }
+        }
+    }
+
+    private var voiceRecorderView: some View {
+        Group {
             Spacer()
 
             Text("What's your voice-to-text shortcut?")
                 .font(.system(size: 16, weight: .semibold))
 
             ShortcutRecorderField(recorder: recorder)
+
+            if let voiceHint {
+                Text(voiceHint)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
 
             Spacer()
 
@@ -213,13 +234,91 @@ private struct OnboardingView: View {
             .controlSize(.regular)
             .disabled(recorder.isRecording)
 
-            Button("I don't use voice-to-text") {
+            Button("I don't have voice-to-text") {
+                showVoiceSuggestion = true
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 11))
+            .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var voiceSuggestionView: some View {
+        Group {
+            Spacer()
+
+            Text("We recommend a voice-to-text tool:")
+                .font(.system(size: 16, weight: .semibold))
+
+            voiceSuggestionCard(
+                icon: "mic.fill",
+                title: "VoiceInk",
+                subtitle: "Best for coding",
+                actionLabel: "try it"
+            ) {
+                NSWorkspace.shared.open(URL(string: "https://tryvoiceink.com?atp=vova")!)
+                recorder.key = "space"
+                recorder.modifiers = ["option"]
+                voiceHint = "Install VoiceInk, then press Save"
+                showVoiceSuggestion = false
+            }
+
+            voiceSuggestionCard(
+                icon: "keyboard",
+                title: "macOS Dictation",
+                subtitle: "Built into your Mac",
+                actionLabel: "set up"
+            ) {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")!)
+                voiceHint = "Set a shortcut in System Settings, then record it here"
+                showVoiceSuggestion = false
+            }
+
+            Spacer()
+
+            Button("Skip") {
                 step = .launchAtLogin
             }
             .buttonStyle(.plain)
             .font(.system(size: 11))
             .foregroundStyle(.tertiary)
         }
+    }
+
+    private func voiceSuggestionCard(
+        icon: String,
+        title: String,
+        subtitle: String,
+        actionLabel: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundStyle(.primary)
+                    .frame(width: 28)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Text(actionLabel)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.blue)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Launch at Login
