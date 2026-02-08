@@ -11,7 +11,8 @@ A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts 
 - **Sticky modifiers** — L1+D-pad app switching holds Cmd across multiple presses, releases on L1 up
 - **Left stick → arrow keys** — with hysteresis thresholds and hold-to-repeat
 - **Right stick → scroll** — continuous smooth scrolling in any direction
-- **L1+right stick → app switch** — flick right for next app, left for previous
+- **L1+left stick → app switch** — flick right for next app, left for previous
+- **L1+right stick → mouse cursor** — move the mouse pointer with the right stick
 - **Hold-to-repeat** — configurable per-button repeat delay and interval
 - **Trigger modes** — fire on press, release, or both (e.g. hold-to-talk for voice input)
 - **HUD overlay** — learning mode shows action labels on every button press
@@ -21,7 +22,7 @@ A lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts 
 
 ## Button Mapping
 
-> [View interactive layout on PadCrafter](https://www.padcrafter.com/?templates=VibePad(Default%2CL1+Layer+(Hold+L1)))
+> [View interactive layout on PadCrafter](https://www.padcrafter.com/index.php?templates=VibePad%7CL1%20Layer%20%28Hold%20L1%29&leftTrigger=Voice-to-text&rightTrigger=Submit&leftBumper=Layer%20Modifier%20%28L1%29&rightBumper=Switch%20Mode&aButton=Accept&bButton=Cancel%7CDelete&xButton=Interrupt&yButton=Paste%7CCopy&dpadUp=History%20Up&dpadDown=History%20Down&dpadLeft=Prev%20Tab%7CPrev%20App&dpadRight=Next%20Tab%7CNext%20App&leftStickClick=Right%20Click%7CRight%20Click&rightStickClick=Left%20Click%7CLeft%20Click&startButton=Slash%20Command&backButton=Clear%20Chat&leftStick=Arrow%20Keys%7CPrev%2FNext%20App&rightStick=Scroll%7CMouse%20Cursor)
 
 ### Default Layer
 
