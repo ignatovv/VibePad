@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3DB0A04D2F39312E00FCA9DB /* TelemetryClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB0A04C2F39312E00FCA9DB /* TelemetryClient */; };
 		3DB0A04F2F39312E00FCA9DB /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB0A04E2F39312E00FCA9DB /* TelemetryDeck */; };
+		3DC0B0512F4D000000SPARK1 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 3DC0B0502F4D000000SPARK1 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,9 +35,22 @@
 		3DCDC9672F36A1750063EE37 /* VibePadUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VibePadUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3DC0B0522F4D000000SPARK1 /* Exceptions for "VibePad" folder in "VibePad" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3DCDC94F2F36A1740063EE37 /* VibePad */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3DCDC9522F36A1740063EE37 /* VibePad */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3DC0B0522F4D000000SPARK1 /* Exceptions for "VibePad" folder in "VibePad" target */,
+			);
 			path = VibePad;
 			sourceTree = "<group>";
 		};
@@ -59,6 +73,7 @@
 			files = (
 				3DB0A04D2F39312E00FCA9DB /* TelemetryClient in Frameworks */,
 				3DB0A04F2F39312E00FCA9DB /* TelemetryDeck in Frameworks */,
+				3DC0B0512F4D000000SPARK1 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +136,7 @@
 			packageProductDependencies = (
 				3DB0A04C2F39312E00FCA9DB /* TelemetryClient */,
 				3DB0A04E2F39312E00FCA9DB /* TelemetryDeck */,
+				3DC0B0502F4D000000SPARK1 /* Sparkle */,
 			);
 			productName = VibePad;
 			productReference = 3DCDC9502F36A1740063EE37 /* VibePad.app */;
@@ -206,6 +222,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */,
+				3DC0B04F2F4D000000SPARK1 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3DCDC9512F36A1740063EE37 /* Products */;
@@ -416,6 +433,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VibePad/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -450,6 +468,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VibePad/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -599,6 +618,14 @@
 				minimumVersion = 2.11.0;
 			};
 		};
+		3DC0B04F2F4D000000SPARK1 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -611,6 +638,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */;
 			productName = TelemetryDeck;
+		};
+		3DC0B0502F4D000000SPARK1 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3DC0B04F2F4D000000SPARK1 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

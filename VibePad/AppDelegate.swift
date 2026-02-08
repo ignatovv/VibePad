@@ -9,6 +9,7 @@ import Cocoa
 import GameController
 import Observation
 import ServiceManagement
+import Sparkle
 
 @Observable
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -55,8 +56,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingWizard: OnboardingWizard?
     private var statusTimer: Timer?
     private var hasTrackedFirstButton = false
+    private var updaterController: SPUStandardUpdaterController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+
         Analytics.start()
 
         let config = VibePadConfig.load()
@@ -183,6 +187,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.isAccessibilityGranted = AccessibilityHelper.isTrusted
             self.launchAtLogin = SMAppService.mainApp.status == .enabled
         }
+    }
+
+    func checkForUpdates() {
+        updaterController?.checkForUpdates(nil)
     }
 
     func showVoiceShortcutPicker() {
