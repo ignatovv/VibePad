@@ -170,6 +170,9 @@ final class InputMapper {
     private var l1LeftStickLeftActive = false
     private var l1LeftStickRightActive = false
 
+    // L1+right stick cursor HUD state (fire once per deflection)
+    private var l1CursorActive = false
+
     // MARK: - Init
 
     init(emitter: KeyboardEmitter) {
@@ -436,6 +439,7 @@ final class InputMapper {
             handleL1RightStick(x: x, y: y)
             return
         }
+        l1CursorActive = false
 
         let dx = Int32(x * scrollSensitivity)
         let dy = Int32(y * scrollSensitivity)
@@ -500,7 +504,13 @@ final class InputMapper {
         let dx = x * cursorSensitivity
         let dy = y * cursorSensitivity
         if dx != 0 || dy != 0 {
+            if !l1CursorActive {
+                l1CursorActive = true
+                onAction?(nil, .typeText("Mouse Cursor"), nil)
+            }
             emitter.postMouseMove(deltaX: dx, deltaY: dy)
+        } else {
+            l1CursorActive = false
         }
     }
 }
