@@ -8,5 +8,7 @@
 	<string>3kdaaiRUrAy4iUKbSk8y3ZD9TuxGBLH82HsbZK1boCM=</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>VibePad needs Accessibility access to send keyboard shortcuts from your gamepad.</string>
 </dict>
 </plist>
