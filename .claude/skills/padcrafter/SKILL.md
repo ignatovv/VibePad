@@ -40,7 +40,7 @@ Generate a PadCrafter-compatible JSON file from VibePad's current button mapping
    **Template 2 — "L1 Layer (Hold L1)":**
    - Only include buttons that have entries in `l1Descriptions` (or `l1Mappings`).
    - All other buttons should be `""`.
-   - Set `rightStick` = `"Prev/Next App"` (L1+right stick does Prev/Next App, matching D-pad behavior).
+   - Set `leftStick` = `"Prev/Next App"` (L1+left stick does app switching) and `rightStick` = `"Mouse Cursor"` (L1+right stick moves the cursor).
 
 4. **Output format** — the JSON structure must be exactly:
    ```json
@@ -89,8 +89,8 @@ Generate a PadCrafter-compatible JSON file from VibePad's current button mapping
              "rightStickClick": "",
              "startButton": "",
              "backButton": "",
-             "leftStick": "",
-             "rightStick": "Prev/Next App"
+             "leftStick": "Prev/Next App",
+             "rightStick": "Mouse Cursor"
            }
          }
        ]

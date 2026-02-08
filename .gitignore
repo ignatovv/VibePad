@@ -46,3 +46,6 @@ fastlane/test_output
 
 # Claude local settings
 .claude/settings.local.json
+
+# Claude scratchpad
+.claude/scratchpad/
