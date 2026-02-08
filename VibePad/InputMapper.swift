@@ -51,7 +51,7 @@ final class InputMapper {
         // L3 (.leftThumbstickButton) — unassigned
         .rightThumbstickButton:.keystroke(key: "tab", modifiers: []),                  // R3 Tab (complete)
         .buttonMenu:           .typeText("/"),                                           // Slash command prefix
-        // Options (.buttonOptions) — unassigned
+        .buttonOptions:        .typeText("/clear"),                                      // Clear chat
     ]
 
     // MARK: - L1 layer mappings
@@ -111,6 +111,7 @@ final class InputMapper {
         .rightTrigger:  "Submit",
         .rightThumbstickButton: "Autocomplete",
         .buttonMenu:    "Slash Command",
+        .buttonOptions: "Clear Chat",
     ]
 
     // MARK: - Active mappings (from config or defaults)
