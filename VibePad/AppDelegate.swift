@@ -85,6 +85,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Analytics.send(Analytics.accessibilityGranted, parameters: [
             "granted": String(isAccessibilityGranted),
         ])
+        if let hudPref = config?.hudEnabled {
+            isHUDEnabled = hudPref
+        }
+
         let emitter = KeyboardEmitter()
 
         // Detect voice app only on first launch (no config yet)
@@ -191,6 +195,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.isAccessibilityGranted = AccessibilityHelper.isTrusted
             self.launchAtLogin = SMAppService.mainApp.status == .enabled
         }
+    }
+
+    func setHUDEnabled(_ enabled: Bool) {
+        isHUDEnabled = enabled
+        VibePadConfig.update { $0.hudEnabled = enabled }
     }
 
     func checkForUpdates() {

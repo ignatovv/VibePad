@@ -11,6 +11,7 @@ struct VibePadConfig: Codable, Sendable {
     var mappings: [String: ActionConfig]
     var l1Mappings: [String: ActionConfig]?
     var stickConfig: StickConfig?
+    var hudEnabled: Bool?
     var detectedVoiceApp: String?
 }
 
@@ -28,6 +29,8 @@ struct ActionConfig: Codable, Sendable {
 }
 
 struct StickConfig: Codable, Sendable {
+    var leftStickType: String?       // "arrowKeys" (default) or "scroll"
+    var rightStickType: String?      // "scroll" (default) or "arrowKeys"
     var leftStickDeadzone: Float?
     var rightStickDeadzone: Float?
     var arrowPressThreshold: Float?
@@ -93,6 +96,13 @@ extension VibePadConfig {
         write(config)
     }
 
+    /// Update a single field in the existing config (or create defaults if no config exists).
+    static func update(_ mutate: (inout VibePadConfig) -> Void) {
+        var config = load() ?? defaultConfig()
+        mutate(&config)
+        write(config)
+    }
+
     private static func write(_ config: VibePadConfig) {
         do {
             let dir = configDirectory
@@ -123,13 +133,16 @@ extension VibePadConfig {
                                                        triggerMode: InputMapper.l1TriggerDefaults[pair.key])
             },
             stickConfig: StickConfig(
+                leftStickType: "arrowKeys",
+                rightStickType: "scroll",
                 leftStickDeadzone: 0.3,
                 rightStickDeadzone: 0.2,
                 arrowPressThreshold: 0.5,
                 arrowReleaseThreshold: 0.3,
                 scrollSensitivity: 15.0,
                 cursorSensitivity: 15.0
-            )
+            ),
+            hudEnabled: true
         )
     }
 }

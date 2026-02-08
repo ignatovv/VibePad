@@ -22,6 +22,11 @@ enum TriggerMode: String, Codable, Sendable {
     case onPressAndRelease
 }
 
+enum StickType: String {
+    case arrowKeys
+    case scroll
+}
+
 final class InputMapper {
 
     private let emitter: KeyboardEmitter
@@ -161,6 +166,10 @@ final class InputMapper {
     // Cursor sensitivity (L1+right stick mouse movement)
     private let cursorSensitivity: Float
 
+    // Stick types (configurable: "arrowKeys" or "scroll")
+    private let leftStickType: StickType
+    private let rightStickType: StickType
+
     // Right stick scroll HUD state (fire once per direction)
     private var scrollUpActive = false
     private var scrollDownActive = false
@@ -190,6 +199,8 @@ final class InputMapper {
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
         self.cursorSensitivity = 15.0
+        self.leftStickType = .arrowKeys
+        self.rightStickType = .scroll
     }
 
     init(emitter: KeyboardEmitter, voiceOverride: MappedAction) {
@@ -208,6 +219,8 @@ final class InputMapper {
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
         self.cursorSensitivity = 15.0
+        self.leftStickType = .arrowKeys
+        self.rightStickType = .scroll
     }
 
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
@@ -225,6 +238,8 @@ final class InputMapper {
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
         self.scrollSensitivity = stick?.scrollSensitivity ?? 15.0
         self.cursorSensitivity = stick?.cursorSensitivity ?? 15.0
+        self.leftStickType = stick?.leftStickType.flatMap(StickType.init(rawValue:)) ?? .arrowKeys
+        self.rightStickType = stick?.rightStickType.flatMap(StickType.init(rawValue:)) ?? .scroll
     }
 
     // MARK: - Button handling
@@ -373,7 +388,7 @@ final class InputMapper {
         }
     }
 
-    // MARK: - Left stick → arrow keys (or L1+left stick → app switching)
+    // MARK: - Left stick (or L1+left stick → app switching)
 
     func handleLeftStick(x: Float, y: Float) {
         if isL1Held {
@@ -385,6 +400,52 @@ final class InputMapper {
         l1LeftStickLeftActive = false
         l1LeftStickRightActive = false
 
+        switch leftStickType {
+        case .arrowKeys: handleArrowKeys(x: x, y: y)
+        case .scroll:    handleScroll(x: x, y: y)
+        }
+    }
+
+    private func handleL1LeftStick(x: Float) {
+        // Right → next app (Cmd+Tab)
+        if !l1LeftStickRightActive && x > arrowPressThreshold {
+            l1LeftStickRightActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"])
+            onAction?(nil, action, "Next App")
+            fireAction(action)
+        } else if l1LeftStickRightActive && x < arrowReleaseThreshold {
+            l1LeftStickRightActive = false
+        }
+
+        // Left → prev app (Cmd+Shift+Tab)
+        if !l1LeftStickLeftActive && x < -arrowPressThreshold {
+            l1LeftStickLeftActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"])
+            onAction?(nil, action, "Prev App")
+            fireAction(action)
+        } else if l1LeftStickLeftActive && x > -arrowReleaseThreshold {
+            l1LeftStickLeftActive = false
+        }
+    }
+
+    // MARK: - Right stick (or L1+right stick → mouse cursor)
+
+    func handleRightStick(x: Float, y: Float) {
+        if isL1Held {
+            handleL1RightStick(x: x, y: y)
+            return
+        }
+        l1CursorActive = false
+
+        switch rightStickType {
+        case .arrowKeys: handleArrowKeys(x: x, y: y)
+        case .scroll:    handleScroll(x: x, y: y)
+        }
+    }
+
+    // MARK: - Shared stick behaviors
+
+    private func handleArrowKeys(x: Float, y: Float) {
         updateArrow(
             axis: y, held: &arrowUpHeld, lastFire: &arrowUpLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["upArrow"]!,
@@ -411,37 +472,7 @@ final class InputMapper {
         )
     }
 
-    private func handleL1LeftStick(x: Float) {
-        // Right → next app (Cmd+Tab)
-        if !l1LeftStickRightActive && x > arrowPressThreshold {
-            l1LeftStickRightActive = true
-            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"])
-            onAction?(nil, action, "Next App")
-            fireAction(action)
-        } else if l1LeftStickRightActive && x < arrowReleaseThreshold {
-            l1LeftStickRightActive = false
-        }
-
-        // Left → prev app (Cmd+Shift+Tab)
-        if !l1LeftStickLeftActive && x < -arrowPressThreshold {
-            l1LeftStickLeftActive = true
-            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"])
-            onAction?(nil, action, "Prev App")
-            fireAction(action)
-        } else if l1LeftStickLeftActive && x > -arrowReleaseThreshold {
-            l1LeftStickLeftActive = false
-        }
-    }
-
-    // MARK: - Right stick → scroll (or L1+right stick → mouse cursor)
-
-    func handleRightStick(x: Float, y: Float) {
-        if isL1Held {
-            handleL1RightStick(x: x, y: y)
-            return
-        }
-        l1CursorActive = false
-
+    private func handleScroll(x: Float, y: Float) {
         let dx = Int32(x * scrollSensitivity)
         let dy = Int32(y * scrollSensitivity)
 

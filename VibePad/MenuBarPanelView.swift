@@ -21,7 +21,7 @@ struct MenuBarPanelView: View {
                     icon: appDelegate.isHUDEnabled ? "checkmark.square" : "square",
                     label: appDelegate.isHUDEnabled ? "Hints On" : "Hints Off"
                 ) {
-                    appDelegate.isHUDEnabled.toggle()
+                    appDelegate.setHUDEnabled(!appDelegate.isHUDEnabled)
                     Analytics.send(Analytics.learningModeToggled, parameters: [
                         "enabled": String(appDelegate.isHUDEnabled),
                     ])
