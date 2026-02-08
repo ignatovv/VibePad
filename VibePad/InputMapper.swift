@@ -48,8 +48,8 @@ final class InputMapper {
         .rightShoulder:        .keystroke(key: "tab", modifiers: ["shift"]),             // R1 Shift+Tab mode switch
         .leftTrigger:          .keystroke(key: "space", modifiers: ["option"]),        // Voice (future)
         .rightTrigger:         .keystroke(key: "return", modifiers: []),               // Submit / Enter
-        // L3 (.leftThumbstickButton) — unassigned
-        .rightThumbstickButton:.keystroke(key: "tab", modifiers: []),                  // R3 Tab (complete)
+        .leftThumbstickButton: .rightMouseClick,                                      // L3 Right click
+        .rightThumbstickButton:.leftMouseClick,                                       // R3 Left click
         .buttonMenu:           .typeText("/"),                                           // Slash command prefix
         .buttonOptions:        .typeText("/clear"),                                      // Clear chat
     ]
@@ -61,8 +61,8 @@ final class InputMapper {
         .buttonB:              .keystroke(key: "delete", modifiers: []),                  // L1+○ Delete
         .dpadLeft:             .stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"]),  // L1+← Prev app
         .dpadRight:            .stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"]),               // L1+→ Next app
-        .rightThumbstickButton: .leftMouseClick,   // L1+R3 = left click
-        .leftThumbstickButton:  .rightMouseClick,  // L1+L3 = right click
+        .leftThumbstickButton: .rightMouseClick,                                         // L1+L3 Right click
+        .rightThumbstickButton:.leftMouseClick,                                          // L1+R3 Left click
     ]
 
     static let l1Descriptions: [GamepadButton: String] = [
@@ -70,8 +70,8 @@ final class InputMapper {
         .buttonB:       "Delete",
         .dpadLeft:      "Prev App",
         .dpadRight:     "Next App",
-        .rightThumbstickButton: "Left Click",
         .leftThumbstickButton:  "Right Click",
+        .rightThumbstickButton: "Left Click",
     ]
 
     // MARK: - Default repeat configs
@@ -109,7 +109,8 @@ final class InputMapper {
         .rightShoulder: "Switch Mode",
         .leftTrigger:   "Voice Input",
         .rightTrigger:  "Submit",
-        .rightThumbstickButton: "Autocomplete",
+        .leftThumbstickButton:  "Right Click",
+        .rightThumbstickButton: "Left Click",
         .buttonMenu:    "Slash Command",
         .buttonOptions: "Clear Chat",
     ]
