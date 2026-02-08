@@ -41,6 +41,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             print("[VibePad] Launch at Login error: \(error)")
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
+        if launchAtLogin {
+            Analytics.send(Analytics.launchAtLoginEnabled)
+        }
     }
 
     var voiceHotkeyLabel: String?
@@ -51,8 +54,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var voiceShortcutPicker: VoiceShortcutPicker?
     private var onboardingWizard: OnboardingWizard?
     private var statusTimer: Timer?
+    private var hasTrackedFirstButton = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        Analytics.start()
+
         let config = VibePadConfig.load()
 
         // Only prompt for accessibility on subsequent launches; wizard handles first launch
@@ -64,6 +70,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         launchAtLogin = SMAppService.mainApp.status == .enabled
         launchAtLoginOnStartup = launchAtLogin
         print("[VibePad] Accessibility granted: \(isAccessibilityGranted)")
+
+        Analytics.send(Analytics.appLaunched, parameters: [
+            "isFirstLaunch": String(config == nil),
+            "hasConfig": String(config != nil),
+        ])
+        Analytics.send(Analytics.sessionStarted, parameters: [
+            "daysSinceInstall": String(Analytics.daysSinceInstall()),
+        ])
+        Analytics.send(Analytics.accessibilityGranted, parameters: [
+            "granted": String(isAccessibilityGranted),
+        ])
         let emitter = KeyboardEmitter()
 
         // Detect voice app only on first launch (no config yet)
@@ -73,6 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let config {
             mapper = InputMapper(emitter: emitter, config: config)
         } else if let voiceApp = detectedVoiceApp {
+            Analytics.send(Analytics.voiceAppDetected, parameters: ["appName": voiceApp.name])
             mapper = InputMapper(emitter: emitter, voiceOverride: voiceApp.action)
         } else {
             mapper = InputMapper(emitter: emitter)
@@ -134,6 +152,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self, self.isEnabled else {
                 print("[VibePad] Button ignored: isEnabled=\(self?.isEnabled ?? false)")
                 return
+            }
+            if pressed && !self.hasTrackedFirstButton {
+                self.hasTrackedFirstButton = true
+                Analytics.send(Analytics.firstButtonPress)
             }
             print("[VibePad] Dispatching button: \(button.rawValue) pressed=\(pressed)")
             mapper.handleButton(button, pressed: pressed)

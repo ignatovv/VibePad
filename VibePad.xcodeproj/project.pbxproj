@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3DB0A04D2F39312E00FCA9DB /* TelemetryClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB0A04C2F39312E00FCA9DB /* TelemetryClient */; };
+		3DB0A04F2F39312E00FCA9DB /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB0A04E2F39312E00FCA9DB /* TelemetryDeck */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3DCDC95E2F36A1750063EE37 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DB0A04D2F39312E00FCA9DB /* TelemetryClient in Frameworks */,
+				3DB0A04F2F39312E00FCA9DB /* TelemetryDeck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = VibePad;
 			packageProductDependencies = (
+				3DB0A04C2F39312E00FCA9DB /* TelemetryClient */,
+				3DB0A04E2F39312E00FCA9DB /* TelemetryDeck */,
 			);
 			productName = VibePad;
 			productReference = 3DCDC9502F36A1740063EE37 /* VibePad.app */;
@@ -195,6 +204,9 @@
 			);
 			mainGroup = 3DCDC9472F36A1740063EE37;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3DCDC9512F36A1740063EE37 /* Products */;
 			projectDirPath = "";
@@ -577,6 +589,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftSDK";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 2.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3DB0A04C2F39312E00FCA9DB /* TelemetryClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryClient;
+		};
+		3DB0A04E2F39312E00FCA9DB /* TelemetryDeck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3DB0A04B2F39312D00FCA9DB /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryDeck;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3DCDC9482F36A1740063EE37 /* Project object */;
 }

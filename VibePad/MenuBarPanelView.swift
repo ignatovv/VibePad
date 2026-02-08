@@ -22,6 +22,9 @@ struct MenuBarPanelView: View {
                     label: "Learning Mode (hints)"
                 ) {
                     appDelegate.isHUDEnabled.toggle()
+                    Analytics.send(Analytics.learningModeToggled, parameters: [
+                        "enabled": String(appDelegate.isHUDEnabled),
+                    ])
                 }
 
                 if !appDelegate.launchAtLoginOnStartup {
@@ -68,6 +71,7 @@ struct MenuBarPanelView: View {
             // MARK: Actions
             VStack(spacing: 0) {
                 ActionRow(icon: "doc.text", label: "Custom Key Bindings") {
+                    Analytics.send(Analytics.customConfigOpened)
                     if !FileManager.default.fileExists(atPath: VibePadConfig.configFileURL.path) {
                         VibePadConfig.writeCurrentDefaults()
                     }
@@ -75,6 +79,7 @@ struct MenuBarPanelView: View {
                 }
 
                 ActionRow(icon: "power", label: "Quit VibePad", shortcut: "\u{2318}Q") {
+                    Analytics.send(Analytics.appQuit)
                     NSApplication.shared.terminate(nil)
                 }
             }

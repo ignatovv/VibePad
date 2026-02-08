@@ -49,3 +49,6 @@ fastlane/test_output
 
 # Claude scratchpad
 .claude/scratchpad/
+
+# Secrets (API keys, app IDs)
+VibePad/Secrets.swift

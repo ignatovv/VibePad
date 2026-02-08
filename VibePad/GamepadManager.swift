@@ -100,6 +100,9 @@ final class GamepadManager {
         GCController.shouldMonitorBackgroundEvents = true
         controller = gc
         connectedControllerName = gc.vendorName
+        Analytics.send(Analytics.controllerConnected, parameters: [
+            "controllerName": gc.vendorName ?? "unknown",
+        ])
         print("[VibePad] Controller setup: \(gc.vendorName ?? "unknown"), hasExtendedGamepad: \(gc.extendedGamepad != nil)")
         registerButtonHandlers(gc)
         startPolling()
