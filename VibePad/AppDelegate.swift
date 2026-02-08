@@ -167,12 +167,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         manager.onLeftStick = { [weak self] x, y in
             guard let self, self.isEnabled else { return }
-            mapper.handleLeftStick(x: x, y: y)
+            DispatchQueue.main.async {
+                mapper.handleLeftStick(x: x, y: y)
+            }
         }
 
         manager.onRightStick = { [weak self] x, y in
             guard let self, self.isEnabled else { return }
-            mapper.handleRightStick(x: x, y: y)
+            DispatchQueue.main.async {
+                mapper.handleRightStick(x: x, y: y)
+            }
         }
 
         manager.startMonitoring()

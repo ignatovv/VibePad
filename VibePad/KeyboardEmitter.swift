@@ -73,7 +73,7 @@ final class KeyboardEmitter {
             print("[VibePad] Unknown key: \(key)")
             return
         }
-        print("[VibePad] Posting keystroke: \(key) (0x\(String(keyCode, radix: 16))) modifiers=\(modifiers)")
+
         let flags = Self.modifierFlags(from: modifiers)
 
         guard let down = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true),
