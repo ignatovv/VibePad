@@ -40,6 +40,9 @@ final class GamepadManager {
     private let triggerPressThreshold: Float = 0.5
     private let triggerReleaseThreshold: Float = 0.3
 
+    // Polling rate
+    private static let pollingInterval: TimeInterval = 1.0 / 60.0
+
     // MARK: - Init
 
     init(leftStickDeadzone: Float = 0.3, rightStickDeadzone: Float = 0.2) {
@@ -160,7 +163,7 @@ final class GamepadManager {
 
     private func startPolling() {
         pollTimer?.invalidate()
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+        pollTimer = Timer.scheduledTimer(withTimeInterval: Self.pollingInterval, repeats: true) { [weak self] _ in
             self?.pollSticks()
         }
     }

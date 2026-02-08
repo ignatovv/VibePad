@@ -237,7 +237,7 @@ struct DefaultConfigTests {
         #expect(stick?.rightStickDeadzone == 0.2)
         #expect(stick?.arrowPressThreshold == 0.5)
         #expect(stick?.arrowReleaseThreshold == 0.3)
-        #expect(stick?.scrollSensitivity == 5.0)
+        #expect(stick?.scrollSensitivity == 15.0)
     }
 
     @Test func defaultConfigSerializesToValidJSON() throws {

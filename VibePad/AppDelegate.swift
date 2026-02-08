@@ -119,9 +119,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Populate voice status
         if let config {
-            // Existing config — read label from persisted L2 mapping
-            if let l2Config = config.mappings[GamepadButton.leftTrigger.rawValue],
-               let action = l2Config.toMappedAction() {
+            if let action = voiceAction(from: config) {
                 voiceHotkeyLabel = OverlayHUD.label(for: action)
             }
         } else {
@@ -209,13 +207,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func showVoiceShortcutPicker() {
         // Pre-fill with current L2 action from config, or default
         let config = VibePadConfig.load()
-        let currentAction: MappedAction
-        if let l2Config = config?.mappings[GamepadButton.leftTrigger.rawValue],
-           let action = l2Config.toMappedAction() {
-            currentAction = action
-        } else {
-            currentAction = .keystroke(key: "space", modifiers: ["option"])
-        }
+        let currentAction = voiceAction(from: config) ?? .keystroke(key: "space", modifiers: ["option"])
 
         let picker = VoiceShortcutPicker()
         self.voiceShortcutPicker = picker
@@ -225,5 +217,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             VibePadConfig.writeCurrentDefaults(voiceOverride: action)
             self.hud?.show(action: action, description: "Restart to apply", duration: 2.0)
         }
+    }
+
+    private func voiceAction(from config: VibePadConfig?) -> MappedAction? {
+        config?.mappings[GamepadButton.leftTrigger.rawValue]?.toMappedAction()
     }
 }

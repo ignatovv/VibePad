@@ -34,10 +34,14 @@ final class InputMapper {
 
     var onAction: ((GamepadButton?, MappedAction, String?) -> Void)?
 
-    // MARK: - Button repeat constants
+    // MARK: - Constants
 
     private static let buttonRepeatDelay: CFAbsoluteTime = 0.4
     private static let buttonRepeatInterval: CFAbsoluteTime = 0.02
+    private static let defaultArrowPressThreshold: Float = 0.5
+    private static let defaultArrowReleaseThreshold: Float = 0.3
+    private static let defaultScrollSensitivity: Float = 15.0
+    private static let defaultCursorSensitivity: Float = 15.0
 
     // MARK: - Default mappings (Claude Code / terminal)
 
@@ -122,20 +126,20 @@ final class InputMapper {
 
     // MARK: - Active mappings (from config or defaults)
 
-    private let activeMappings: [GamepadButton: MappedAction]
-    private let activeL1Mappings: [GamepadButton: MappedAction]
-    private let activeDescriptions: [GamepadButton: String]
-    private let activeL1Descriptions: [GamepadButton: String]
+    private var activeMappings: [GamepadButton: MappedAction] = [:]
+    private var activeL1Mappings: [GamepadButton: MappedAction] = [:]
+    private var activeDescriptions: [GamepadButton: String] = [:]
+    private var activeL1Descriptions: [GamepadButton: String] = [:]
 
     // MARK: - Button repeat config & state
 
-    private let activeRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
-    private let activeL1RepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)]
+    private var activeRepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [:]
+    private var activeL1RepeatConfigs: [GamepadButton: (delay: CFAbsoluteTime, interval: CFAbsoluteTime)] = [:]
 
     // MARK: - Trigger modes
 
-    private let activeTriggerModes: [GamepadButton: TriggerMode]
-    private let activeL1TriggerModes: [GamepadButton: TriggerMode]
+    private var activeTriggerModes: [GamepadButton: TriggerMode] = [:]
+    private var activeL1TriggerModes: [GamepadButton: TriggerMode] = [:]
     private var heldRepeatButtons: [GamepadButton: (lastFire: CFAbsoluteTime, isL1: Bool)] = [:]
     private var repeatTimer: Timer?
     private var heldStickyModifiers: Set<String> = []
@@ -157,18 +161,18 @@ final class InputMapper {
     private let arrowRepeatInterval: CFAbsoluteTime = 0.02 // ~50 repeats/sec
 
     // Hysteresis thresholds for stick → arrow
-    private let arrowPressThreshold: Float
-    private let arrowReleaseThreshold: Float
+    private var arrowPressThreshold: Float = defaultArrowPressThreshold
+    private var arrowReleaseThreshold: Float = defaultArrowReleaseThreshold
 
     // Scroll sensitivity
-    private let scrollSensitivity: Float
+    private var scrollSensitivity: Float = defaultScrollSensitivity
 
     // Cursor sensitivity (L1+right stick mouse movement)
-    private let cursorSensitivity: Float
+    private var cursorSensitivity: Float = defaultCursorSensitivity
 
     // Stick types (configurable: "arrowKeys" or "scroll")
-    private let leftStickType: StickType
-    private let rightStickType: StickType
+    private var leftStickType: StickType = .arrowKeys
+    private var rightStickType: StickType = .scroll
 
     // Right stick scroll HUD state (fire once per direction)
     private var scrollUpActive = false
@@ -188,19 +192,7 @@ final class InputMapper {
     init(emitter: KeyboardEmitter) {
         self.emitter = emitter
         self.activeMappings = Self.defaultMappings
-        self.activeL1Mappings = Self.l1Mappings
-        self.activeDescriptions = Self.defaultDescriptions
-        self.activeL1Descriptions = Self.l1Descriptions
-        self.activeRepeatConfigs = Self.defaultRepeatConfigs
-        self.activeL1RepeatConfigs = Self.l1RepeatDefaults
-        self.activeTriggerModes = Self.defaultTriggerModes
-        self.activeL1TriggerModes = Self.l1TriggerDefaults
-        self.arrowPressThreshold = 0.5
-        self.arrowReleaseThreshold = 0.3
-        self.scrollSensitivity = 15.0
-        self.cursorSensitivity = 15.0
-        self.leftStickType = .arrowKeys
-        self.rightStickType = .scroll
+        applyDefaults()
     }
 
     init(emitter: KeyboardEmitter, voiceOverride: MappedAction) {
@@ -208,38 +200,44 @@ final class InputMapper {
         var mappings = Self.defaultMappings
         mappings[.leftTrigger] = voiceOverride
         self.activeMappings = mappings
-        self.activeL1Mappings = Self.l1Mappings
-        self.activeDescriptions = Self.defaultDescriptions
-        self.activeL1Descriptions = Self.l1Descriptions
-        self.activeRepeatConfigs = Self.defaultRepeatConfigs
-        self.activeL1RepeatConfigs = Self.l1RepeatDefaults
-        self.activeTriggerModes = Self.defaultTriggerModes
-        self.activeL1TriggerModes = Self.l1TriggerDefaults
-        self.arrowPressThreshold = 0.5
-        self.arrowReleaseThreshold = 0.3
-        self.scrollSensitivity = 15.0
-        self.cursorSensitivity = 15.0
-        self.leftStickType = .arrowKeys
-        self.rightStickType = .scroll
+        applyDefaults()
     }
 
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
         self.emitter = emitter
         self.activeMappings = Self.defaultMappings.merging(config.mappings.toButtonMappings()) { _, new in new }
-        self.activeL1Mappings = Self.l1Mappings.merging(config.l1Mappings?.toButtonMappings() ?? [:]) { _, new in new }
-        self.activeDescriptions = Self.defaultDescriptions.merging(config.mappings.toButtonDescriptions()) { _, new in new }
-        self.activeL1Descriptions = Self.l1Descriptions.merging(config.l1Mappings?.toButtonDescriptions() ?? [:]) { _, new in new }
-        self.activeRepeatConfigs = Self.defaultRepeatConfigs.merging(config.mappings.toButtonRepeatConfigs()) { _, new in new }
-        self.activeL1RepeatConfigs = Self.l1RepeatDefaults.merging(config.l1Mappings?.toButtonRepeatConfigs() ?? [:]) { _, new in new }
-        self.activeTriggerModes = Self.defaultTriggerModes.merging(config.mappings.toButtonTriggerModes()) { _, new in new }
-        self.activeL1TriggerModes = Self.l1TriggerDefaults.merging(config.l1Mappings?.toButtonTriggerModes() ?? [:]) { _, new in new }
+        applyDefaults()
+        // Apply config overrides on top of defaults
+        activeL1Mappings.merge(config.l1Mappings?.toButtonMappings() ?? [:]) { _, new in new }
+        activeDescriptions.merge(config.mappings.toButtonDescriptions()) { _, new in new }
+        activeL1Descriptions.merge(config.l1Mappings?.toButtonDescriptions() ?? [:]) { _, new in new }
+        activeRepeatConfigs.merge(config.mappings.toButtonRepeatConfigs()) { _, new in new }
+        activeL1RepeatConfigs.merge(config.l1Mappings?.toButtonRepeatConfigs() ?? [:]) { _, new in new }
+        activeTriggerModes.merge(config.mappings.toButtonTriggerModes()) { _, new in new }
+        activeL1TriggerModes.merge(config.l1Mappings?.toButtonTriggerModes() ?? [:]) { _, new in new }
         let stick = config.stickConfig
-        self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
-        self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
-        self.scrollSensitivity = stick?.scrollSensitivity ?? 15.0
-        self.cursorSensitivity = stick?.cursorSensitivity ?? 15.0
-        self.leftStickType = stick?.leftStickType.flatMap(StickType.init(rawValue:)) ?? .arrowKeys
-        self.rightStickType = stick?.rightStickType.flatMap(StickType.init(rawValue:)) ?? .scroll
+        arrowPressThreshold = stick?.arrowPressThreshold ?? Self.defaultArrowPressThreshold
+        arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? Self.defaultArrowReleaseThreshold
+        scrollSensitivity = stick?.scrollSensitivity ?? Self.defaultScrollSensitivity
+        cursorSensitivity = stick?.cursorSensitivity ?? Self.defaultCursorSensitivity
+        leftStickType = stick?.leftStickType.flatMap(StickType.init(rawValue:)) ?? .arrowKeys
+        rightStickType = stick?.rightStickType.flatMap(StickType.init(rawValue:)) ?? .scroll
+    }
+
+    private func applyDefaults() {
+        activeL1Mappings = Self.l1Mappings
+        activeDescriptions = Self.defaultDescriptions
+        activeL1Descriptions = Self.l1Descriptions
+        activeRepeatConfigs = Self.defaultRepeatConfigs
+        activeL1RepeatConfigs = Self.l1RepeatDefaults
+        activeTriggerModes = Self.defaultTriggerModes
+        activeL1TriggerModes = Self.l1TriggerDefaults
+        arrowPressThreshold = Self.defaultArrowPressThreshold
+        arrowReleaseThreshold = Self.defaultArrowReleaseThreshold
+        scrollSensitivity = Self.defaultScrollSensitivity
+        cursorSensitivity = Self.defaultCursorSensitivity
+        leftStickType = .arrowKeys
+        rightStickType = .scroll
     }
 
     // MARK: - Button handling
@@ -448,25 +446,25 @@ final class InputMapper {
     private func handleArrowKeys(x: Float, y: Float) {
         updateArrow(
             axis: y, held: &arrowUpHeld, lastFire: &arrowUpLastFire,
-            keyCode: KeyboardEmitter.keyCodeMap["upArrow"]!,
+            keyCode: KeyboardEmitter.keyCodeMap["upArrow", default: 0],
             positive: true,
             action: .keystroke(key: "upArrow", modifiers: []), description: "Move Up"
         )
         updateArrow(
             axis: y, held: &arrowDownHeld, lastFire: &arrowDownLastFire,
-            keyCode: KeyboardEmitter.keyCodeMap["downArrow"]!,
+            keyCode: KeyboardEmitter.keyCodeMap["downArrow", default: 0],
             positive: false,
             action: .keystroke(key: "downArrow", modifiers: []), description: "Move Down"
         )
         updateArrow(
             axis: x, held: &arrowRightHeld, lastFire: &arrowRightLastFire,
-            keyCode: KeyboardEmitter.keyCodeMap["rightArrow"]!,
+            keyCode: KeyboardEmitter.keyCodeMap["rightArrow", default: 0],
             positive: true,
             action: .keystroke(key: "rightArrow", modifiers: []), description: "Move Right"
         )
         updateArrow(
             axis: x, held: &arrowLeftHeld, lastFire: &arrowLeftLastFire,
-            keyCode: KeyboardEmitter.keyCodeMap["leftArrow"]!,
+            keyCode: KeyboardEmitter.keyCodeMap["leftArrow", default: 0],
             positive: false,
             action: .keystroke(key: "leftArrow", modifiers: []), description: "Move Left"
         )
