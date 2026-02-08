@@ -32,6 +32,22 @@ struct MenuBarPanelView: View {
                         appDelegate.setLaunchAtLogin(!appDelegate.launchAtLogin)
                     }
                 }
+
+                if let hotkey = appDelegate.voiceHotkeyLabel {
+                    ActionRow(
+                        icon: "mic.fill",
+                        label: "Voice Input (\(hotkey))"
+                    ) {
+                        appDelegate.showVoiceShortcutPicker()
+                    }
+                } else {
+                    ActionRow(
+                        icon: "mic",
+                        label: "Voice Input: Set Up"
+                    ) {
+                        appDelegate.showVoiceShortcutPicker()
+                    }
+                }
             }
 
             Divider()

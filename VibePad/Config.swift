@@ -11,6 +11,7 @@ struct VibePadConfig: Codable, Sendable {
     var mappings: [String: ActionConfig]
     var l1Mappings: [String: ActionConfig]?
     var stickConfig: StickConfig?
+    var detectedVoiceApp: String?
 }
 
 struct ActionConfig: Codable, Sendable {
@@ -67,7 +68,31 @@ extension VibePadConfig {
 
     /// Write current code defaults to disk (on-demand, e.g. when user opens Custom Key Bindings).
     static func writeCurrentDefaults() {
-        let config = defaultConfig()
+        write(defaultConfig())
+    }
+
+    /// Write defaults with a voice override for L2 (manual config, no app name).
+    static func writeCurrentDefaults(voiceOverride: MappedAction) {
+        var config = defaultConfig()
+        config.mappings[GamepadButton.leftTrigger.rawValue] = ActionConfig(
+            from: voiceOverride,
+            description: InputMapper.defaultDescriptions[.leftTrigger]
+        )
+        write(config)
+    }
+
+    /// Write defaults with a detected voice app override for L2.
+    static func writeCurrentDefaults(voiceOverride: MappedAction, voiceAppName: String) {
+        var config = defaultConfig()
+        config.detectedVoiceApp = voiceAppName
+        config.mappings[GamepadButton.leftTrigger.rawValue] = ActionConfig(
+            from: voiceOverride,
+            description: InputMapper.defaultDescriptions[.leftTrigger]
+        )
+        write(config)
+    }
+
+    private static func write(_ config: VibePadConfig) {
         do {
             let dir = configDirectory
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -75,7 +100,7 @@ extension VibePadConfig {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(config)
             try data.write(to: configFileURL, options: .atomic)
-            print("[VibePad] Wrote default config to \(configFileURL.path)")
+            print("[VibePad] Wrote config to \(configFileURL.path)")
         } catch {
             print("[VibePad] Failed to write config: \(error)")
         }

@@ -39,7 +39,7 @@ final class OverlayHUD {
         self.hostingView = hosting
     }
 
-    func show(action: MappedAction, description: String? = nil) {
+    func show(action: MappedAction, description: String? = nil, duration: TimeInterval = 1.5) {
         actionLabel = Self.label(for: action)
         descriptionLabel = description
 
@@ -63,7 +63,7 @@ final class OverlayHUD {
 
         // Reset dismiss timer
         dismissTimer?.invalidate()
-        dismissTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { [weak self] _ in
+        dismissTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
             self?.hide()
         }
     }
@@ -81,14 +81,14 @@ final class OverlayHUD {
 
     // MARK: - Display helpers
 
-    private static let modifierSymbols: [String: String] = [
+    static let modifierSymbols: [String: String] = [
         "command": "\u{2318}",  // ⌘
         "shift": "\u{21E7}",   // ⇧
         "control": "\u{2303}", // ⌃
         "option": "\u{2325}",  // ⌥
     ]
 
-    private static let keyDisplayNames: [String: String] = [
+    static let keyDisplayNames: [String: String] = [
         "return": "Enter",
         "escape": "Esc",
         "tab": "Tab",

@@ -177,6 +177,23 @@ final class InputMapper {
         self.scrollSensitivity = 15.0
     }
 
+    init(emitter: KeyboardEmitter, voiceOverride: MappedAction) {
+        self.emitter = emitter
+        var mappings = Self.defaultMappings
+        mappings[.leftTrigger] = voiceOverride
+        self.activeMappings = mappings
+        self.activeL1Mappings = Self.l1Mappings
+        self.activeDescriptions = Self.defaultDescriptions
+        self.activeL1Descriptions = Self.l1Descriptions
+        self.activeRepeatConfigs = Self.defaultRepeatConfigs
+        self.activeL1RepeatConfigs = Self.l1RepeatDefaults
+        self.activeTriggerModes = Self.defaultTriggerModes
+        self.activeL1TriggerModes = Self.l1TriggerDefaults
+        self.arrowPressThreshold = 0.5
+        self.arrowReleaseThreshold = 0.3
+        self.scrollSensitivity = 15.0
+    }
+
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
         self.emitter = emitter
         self.activeMappings = Self.defaultMappings.merging(config.mappings.toButtonMappings()) { _, new in new }
