@@ -116,6 +116,10 @@ final class OverlayHUD {
             return text
         case .smartPaste:
             return "⌘V"
+        case .leftMouseClick:
+            return "Click"
+        case .rightMouseClick:
+            return "Right Click"
         }
     }
 }

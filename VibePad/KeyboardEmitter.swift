@@ -159,4 +159,34 @@ final class KeyboardEmitter {
         ) else { return }
         event.post(tap: .cghidEventTap)
     }
+
+    // MARK: - Mouse cursor
+
+    func postMouseMove(deltaX: Float, deltaY: Float) {
+        guard let currentPos = CGEvent(source: nil)?.location else { return }
+        let newX = currentPos.x + CGFloat(deltaX)
+        let newY = currentPos.y - CGFloat(deltaY)  // stick Y-up = screen Y-down
+        CGWarpMouseCursorPosition(CGPoint(x: newX, y: newY))
+    }
+
+    func postMouseClick(button: CGMouseButton) {
+        guard let pos = CGEvent(source: nil)?.location else { return }
+        let downType: CGEventType
+        let upType: CGEventType
+        switch button {
+        case .left:
+            downType = .leftMouseDown
+            upType = .leftMouseUp
+        case .right:
+            downType = .rightMouseDown
+            upType = .rightMouseUp
+        default:
+            return
+        }
+        guard let down = CGEvent(mouseEventSource: nil, mouseType: downType, mouseCursorPosition: pos, mouseButton: button),
+              let up = CGEvent(mouseEventSource: nil, mouseType: upType, mouseCursorPosition: pos, mouseButton: button)
+        else { return }
+        down.post(tap: .cghidEventTap)
+        up.post(tap: .cghidEventTap)
+    }
 }

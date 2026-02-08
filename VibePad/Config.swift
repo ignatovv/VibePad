@@ -33,6 +33,7 @@ struct StickConfig: Codable, Sendable {
     var arrowPressThreshold: Float?
     var arrowReleaseThreshold: Float?
     var scrollSensitivity: Float?
+    var cursorSensitivity: Float?
 }
 
 // MARK: - Load / Save
@@ -126,7 +127,8 @@ extension VibePadConfig {
                 rightStickDeadzone: 0.2,
                 arrowPressThreshold: 0.5,
                 arrowReleaseThreshold: 0.3,
-                scrollSensitivity: 15.0
+                scrollSensitivity: 15.0,
+                cursorSensitivity: 15.0
             )
         )
     }
@@ -159,6 +161,14 @@ extension ActionConfig {
             self.init(type: "smartPaste", key: nil, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
                       repeats: nil, repeatDelay: nil, repeatInterval: nil,
                       trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
+        case .leftMouseClick:
+            self.init(type: "leftMouseClick", key: nil, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
+                      repeats: nil, repeatDelay: nil, repeatInterval: nil,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
+        case .rightMouseClick:
+            self.init(type: "rightMouseClick", key: nil, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
+                      repeats: nil, repeatDelay: nil, repeatInterval: nil,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         }
     }
 
@@ -184,6 +194,10 @@ extension ActionConfig {
             return .typeText(text)
         case "smartPaste":
             return .smartPaste
+        case "leftMouseClick":
+            return .leftMouseClick
+        case "rightMouseClick":
+            return .rightMouseClick
         default:
             print("[VibePad] Config: unknown action type \"\(type)\"")
             return nil

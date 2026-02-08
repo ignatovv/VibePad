@@ -12,6 +12,8 @@ enum MappedAction: Equatable {
     case stickyKeystroke(key: String, modifiers: [String], stickyModifiers: [String])
     case typeText(String)
     case smartPaste
+    case leftMouseClick
+    case rightMouseClick
 }
 
 enum TriggerMode: String, Codable, Sendable {
@@ -29,7 +31,7 @@ final class InputMapper {
 
     // MARK: - Button repeat constants
 
-    private static let buttonRepeatDelay: CFAbsoluteTime = 0.15
+    private static let buttonRepeatDelay: CFAbsoluteTime = 0.4
     private static let buttonRepeatInterval: CFAbsoluteTime = 0.02
 
     // MARK: - Default mappings (Claude Code / terminal)
@@ -59,6 +61,8 @@ final class InputMapper {
         .buttonB:              .keystroke(key: "delete", modifiers: []),                  // L1+○ Delete
         .dpadLeft:             .stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"]),  // L1+← Prev app
         .dpadRight:            .stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"]),               // L1+→ Next app
+        .rightThumbstickButton: .leftMouseClick,   // L1+R3 = left click
+        .leftThumbstickButton:  .rightMouseClick,  // L1+L3 = right click
     ]
 
     static let l1Descriptions: [GamepadButton: String] = [
@@ -66,6 +70,8 @@ final class InputMapper {
         .buttonB:       "Delete",
         .dpadLeft:      "Prev App",
         .dpadRight:     "Next App",
+        .rightThumbstickButton: "Left Click",
+        .leftThumbstickButton:  "Right Click",
     ]
 
     // MARK: - Default repeat configs
@@ -150,15 +156,18 @@ final class InputMapper {
     // Scroll sensitivity
     private let scrollSensitivity: Float
 
+    // Cursor sensitivity (L1+right stick mouse movement)
+    private let cursorSensitivity: Float
+
     // Right stick scroll HUD state (fire once per direction)
     private var scrollUpActive = false
     private var scrollDownActive = false
     private var scrollLeftActive = false
     private var scrollRightActive = false
 
-    // L1+right stick app switching (single-fire per deflection)
-    private var l1RightStickLeftActive = false
-    private var l1RightStickRightActive = false
+    // L1+left stick app switching (single-fire per deflection)
+    private var l1LeftStickLeftActive = false
+    private var l1LeftStickRightActive = false
 
     // MARK: - Init
 
@@ -175,6 +184,7 @@ final class InputMapper {
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
+        self.cursorSensitivity = 15.0
     }
 
     init(emitter: KeyboardEmitter, voiceOverride: MappedAction) {
@@ -192,6 +202,7 @@ final class InputMapper {
         self.arrowPressThreshold = 0.5
         self.arrowReleaseThreshold = 0.3
         self.scrollSensitivity = 15.0
+        self.cursorSensitivity = 15.0
     }
 
     init(emitter: KeyboardEmitter, config: VibePadConfig) {
@@ -208,6 +219,7 @@ final class InputMapper {
         self.arrowPressThreshold = stick?.arrowPressThreshold ?? 0.5
         self.arrowReleaseThreshold = stick?.arrowReleaseThreshold ?? 0.3
         self.scrollSensitivity = stick?.scrollSensitivity ?? 15.0
+        self.cursorSensitivity = stick?.cursorSensitivity ?? 15.0
     }
 
     // MARK: - Button handling
@@ -307,6 +319,10 @@ final class InputMapper {
             } else {
                 emitter.postKeystroke(key: "v", modifiers: ["command"])
             }
+        case .leftMouseClick:
+            emitter.postMouseClick(button: .left)
+        case .rightMouseClick:
+            emitter.postMouseClick(button: .right)
         }
     }
 
@@ -352,9 +368,18 @@ final class InputMapper {
         }
     }
 
-    // MARK: - Left stick → arrow keys
+    // MARK: - Left stick → arrow keys (or L1+left stick → app switching)
 
     func handleLeftStick(x: Float, y: Float) {
+        if isL1Held {
+            handleL1LeftStick(x: x)
+            return
+        }
+
+        // Reset L1+left stick state when not in L1 layer
+        l1LeftStickLeftActive = false
+        l1LeftStickRightActive = false
+
         updateArrow(
             axis: y, held: &arrowUpHeld, lastFire: &arrowUpLastFire,
             keyCode: KeyboardEmitter.keyCodeMap["upArrow"]!,
@@ -381,41 +406,35 @@ final class InputMapper {
         )
     }
 
-    private func updateArrow(axis: Float, held: inout Bool, lastFire: inout CFAbsoluteTime,
-                             keyCode: CGKeyCode, positive: Bool,
-                             action: MappedAction, description: String) {
-        let value = positive ? axis : -axis
-        let now = CFAbsoluteTimeGetCurrent()
+    private func handleL1LeftStick(x: Float) {
+        // Right → next app (Cmd+Tab)
+        if !l1LeftStickRightActive && x > arrowPressThreshold {
+            l1LeftStickRightActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"])
+            onAction?(nil, action, "Next App")
+            fireAction(action)
+        } else if l1LeftStickRightActive && x < arrowReleaseThreshold {
+            l1LeftStickRightActive = false
+        }
 
-        if !held && value > arrowPressThreshold {
-            held = true
-            onAction?(nil, action, description)
-            emitter.postKeystroke(keyCode: keyCode)
-            lastFire = now
-        } else if held && value >= arrowReleaseThreshold {
-            // Still held — repeat after initial delay, then at repeat interval
-            let elapsed = now - lastFire
-            let threshold = (elapsed < arrowRepeatDelay + arrowRepeatInterval) ? arrowRepeatDelay : arrowRepeatInterval
-            if now - lastFire >= threshold {
-                emitter.postKeystroke(keyCode: keyCode)
-                lastFire = now
-            }
-        } else if held && value < arrowReleaseThreshold {
-            held = false
+        // Left → prev app (Cmd+Shift+Tab)
+        if !l1LeftStickLeftActive && x < -arrowPressThreshold {
+            l1LeftStickLeftActive = true
+            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"])
+            onAction?(nil, action, "Prev App")
+            fireAction(action)
+        } else if l1LeftStickLeftActive && x > -arrowReleaseThreshold {
+            l1LeftStickLeftActive = false
         }
     }
 
-    // MARK: - Right stick → scroll (or L1+right stick → app switching)
+    // MARK: - Right stick → scroll (or L1+right stick → mouse cursor)
 
     func handleRightStick(x: Float, y: Float) {
         if isL1Held {
-            handleL1RightStick(x: x)
+            handleL1RightStick(x: x, y: y)
             return
         }
-
-        // Reset L1+right stick state when not in L1 layer
-        l1RightStickLeftActive = false
-        l1RightStickRightActive = false
 
         let dx = Int32(x * scrollSensitivity)
         let dy = Int32(y * scrollSensitivity)
@@ -452,25 +471,35 @@ final class InputMapper {
         }
     }
 
-    private func handleL1RightStick(x: Float) {
-        // Right → next app (Cmd+Tab)
-        if !l1RightStickRightActive && x > arrowPressThreshold {
-            l1RightStickRightActive = true
-            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: [], stickyModifiers: ["command"])
-            onAction?(nil, action, "Next App")
-            fireAction(action)
-        } else if l1RightStickRightActive && x < arrowReleaseThreshold {
-            l1RightStickRightActive = false
-        }
+    private func updateArrow(axis: Float, held: inout Bool, lastFire: inout CFAbsoluteTime,
+                             keyCode: CGKeyCode, positive: Bool,
+                             action: MappedAction, description: String) {
+        let value = positive ? axis : -axis
+        let now = CFAbsoluteTimeGetCurrent()
 
-        // Left → prev app (Cmd+Shift+Tab)
-        if !l1RightStickLeftActive && x < -arrowPressThreshold {
-            l1RightStickLeftActive = true
-            let action = MappedAction.stickyKeystroke(key: "tab", modifiers: ["shift"], stickyModifiers: ["command"])
-            onAction?(nil, action, "Prev App")
-            fireAction(action)
-        } else if l1RightStickLeftActive && x > -arrowReleaseThreshold {
-            l1RightStickLeftActive = false
+        if !held && value > arrowPressThreshold {
+            held = true
+            onAction?(nil, action, description)
+            emitter.postKeystroke(keyCode: keyCode)
+            lastFire = now
+        } else if held && value >= arrowReleaseThreshold {
+            // Still held — repeat after initial delay, then at repeat interval
+            let elapsed = now - lastFire
+            let threshold = (elapsed < arrowRepeatDelay + arrowRepeatInterval) ? arrowRepeatDelay : arrowRepeatInterval
+            if now - lastFire >= threshold {
+                emitter.postKeystroke(keyCode: keyCode)
+                lastFire = now
+            }
+        } else if held && value < arrowReleaseThreshold {
+            held = false
+        }
+    }
+
+    private func handleL1RightStick(x: Float, y: Float) {
+        let dx = x * cursorSensitivity
+        let dy = y * cursorSensitivity
+        if dx != 0 || dy != 0 {
+            emitter.postMouseMove(deltaX: dx, deltaY: dy)
         }
     }
 }
