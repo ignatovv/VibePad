@@ -22,7 +22,7 @@ If the user just ran `/release`, these values should be available in the convers
 1. **Read the current appcast**:
    Read `/Users/vyuignatiov/code/vibepad-site/appcast.xml`.
 
-2. **Add a new `<item>` entry** inside `<channel>`, as the first item (newest first). Use this format:
+2. **Replace the existing `<item>` entry** in `<channel>` with the new version's data. Use this format:
 ```xml
     <item>
       <title>Version {VERSION}</title>
@@ -38,7 +38,7 @@ If the user just ran `/release`, these values should be available in the convers
       />
     </item>
 ```
-   Use the current date/time for `<pubDate>`. Insert the new item before any existing items.
+   Use the current date/time for `<pubDate>`. **Replace** (don't stack) — the site serves a single DMG at a stable URL, so old entries would have stale signatures/lengths. Sparkle only checks the newest compatible item anyway.
 
 3. **Copy the DMG** to the website assets (stable filename for the download button):
 ```bash
