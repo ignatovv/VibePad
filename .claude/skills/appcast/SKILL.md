@@ -12,7 +12,7 @@ Ask the user for any values not provided as arguments or inferrable from context
 
 1. **Version** (e.g. `1.1`) — the `sparkle:shortVersionString`
 2. **Build number** (e.g. `2`) — the `sparkle:version`
-3. **Download URL** — typically `https://github.com/user/VibePad/releases/download/v{VERSION}/VibePad-{VERSION}.zip`
+3. **Download URL** — `https://github.com/ignatovv/VibePad/releases/download/v{VERSION}/VibePad-{VERSION}.zip`
 4. **EdDSA signature** — the `sparkle:edSignature="..."` value from `sign_update`
 5. **File length** in bytes — the `length="..."` value from `sign_update`
 
@@ -32,7 +32,7 @@ If the user just ran `/release`, these values should be available in the convers
       <sparkle:shortVersionString>{VERSION}</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <enclosure
-        url="{DOWNLOAD_URL}"
+        url="https://github.com/ignatovv/VibePad/releases/download/v{VERSION}/VibePad-{VERSION}.zip"
         type="application/octet-stream"
         sparkle:edSignature="{ED_SIGNATURE}"
         length="{FILE_LENGTH}"
@@ -41,8 +41,12 @@ If the user just ran `/release`, these values should be available in the convers
 ```
    Use the current date/time for `<pubDate>`. Insert the new item before any existing items.
 
-3. **Show the user the updated appcast** and remind them to deploy the site:
+3. **Deploy the site**:
 ```bash
 cd ~/code/vibepad-site && wrangler deploy
 ```
-   Or whatever their deployment workflow is for the Cloudflare Workers site.
+
+4. **Report to the user**:
+   - Show the updated appcast entry
+   - Confirm the deploy succeeded
+   - Remind them to verify at `https://vibepad.now/appcast.xml`
