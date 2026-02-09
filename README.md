@@ -1,16 +1,20 @@
-# VibePad
+<p align="center">
+  <img src="assets/mascot.svg" alt="VibePad mascot" width="200">
+</p>
 
-> Ship code from your couch. Control your AI coding assistant with a gamepad.
+<h1 align="center">VibePad</h1>
+
+<p align="center">
+  Ship code from your couch. Control your AI coding assistant with a gamepad.
+</p>
+
+<p align="center">
+  <img src="assets/hero.gif" alt="VibePad demo — controlling Claude Code with a DualSense gamepad" width="720">
+</p>
 
 Lean back, grab your PS5 controller, and ship code. VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development in Cursor, VS Code, and terminal.
 
 Accept AI suggestions, scroll through code, switch apps, dictate with voice — all without touching your keyboard.
-
-<img src="docs/vibepad-layout.png" alt="VibePad default layer — controller mapping diagram" width="700">
-
-<img src="docs/vibepad-l1-layout.png" alt="VibePad L1 layer — hold L1 for extra actions" width="700">
-
-> [View interactive layout on PadCrafter](https://www.padcrafter.com/index.php?templates=VibePad%7CL1%20Layer%20%28Hold%20L1%29&leftTrigger=Voice-to-text&rightTrigger=Submit&leftBumper=Layer%20Modifier%20%28L1%29&rightBumper=Switch%20Mode&aButton=Accept&bButton=Cancel%7CDelete&xButton=Interrupt&yButton=Paste%7CCopy&dpadUp=History%20Up&dpadDown=History%20Down&dpadLeft=Prev%20Tab%7CPrev%20App&dpadRight=Next%20Tab%7CNext%20App&leftStickClick=Right%20Click%7CRight%20Click&rightStickClick=Left%20Click%7CLeft%20Click&startButton=Slash%20Command&backButton=Clear%20Chat&leftStick=Arrow%20Keys%7CPrev%2FNext%20App&rightStick=Scroll%7CMouse%20Cursor)
 
 ## How It Works
 
@@ -82,6 +86,14 @@ Note: `leftShoulder` (L1) is reserved as the modifier layer key and cannot be re
 ### Available keys
 
 Letters (`a`-`z`), numbers (`0`-`9`), `return`, `escape`, `space`, `tab`, `delete`, `forwardDelete`, arrows (`upArrow`, `downArrow`, `leftArrow`, `rightArrow`), punctuation (`grave`, `minus`, `equal`, `leftBracket`, `rightBracket`, `backslash`, `semicolon`, `quote`, `comma`, `period`, `slash`), function keys (`f1`-`f12`).
+
+## Button Layout
+
+<img src="docs/vibepad-layout.png" alt="VibePad default layer — controller mapping diagram" width="700">
+
+<img src="docs/vibepad-l1-layout.png" alt="VibePad L1 layer — hold L1 for extra actions" width="700">
+
+> [View interactive layout on PadCrafter](https://www.padcrafter.com/index.php?templates=VibePad%7CL1%20Layer%20%28Hold%20L1%29&leftTrigger=Voice-to-text&rightTrigger=Submit&leftBumper=Layer%20Modifier%20%28L1%29&rightBumper=Switch%20Mode&aButton=Accept&bButton=Cancel%7CDelete&xButton=Interrupt&yButton=Paste%7CCopy&dpadUp=History%20Up&dpadDown=History%20Down&dpadLeft=Prev%20Tab%7CPrev%20App&dpadRight=Next%20Tab%7CNext%20App&leftStickClick=Right%20Click%7CRight%20Click&rightStickClick=Left%20Click%7CLeft%20Click&startButton=Slash%20Command&backButton=Clear%20Chat&leftStick=Arrow%20Keys%7CPrev%2FNext%20App&rightStick=Scroll%7CMouse%20Cursor)
 
 ## Requirements
 
