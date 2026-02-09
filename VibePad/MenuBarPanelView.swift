@@ -73,6 +73,14 @@ struct MenuBarPanelView: View {
                     NSWorkspace.shared.open(VibePadConfig.configFileURL)
                 }
 
+                ActionRow(icon: "envelope", label: "Leave Feedback") {
+                    let subject = "VibePad Feedback"
+                    let body = ""
+                    if let url = URL(string: "mailto:feedback@vibepad.now?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject)&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? body)") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
                 ActionRow(icon: "power", label: "Quit VibePad", shortcut: "\u{2318}Q") {
                     Analytics.send(Analytics.appQuit)
                     NSApplication.shared.terminate(nil)
