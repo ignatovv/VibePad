@@ -344,7 +344,7 @@ final class InputMapper {
         }
     }
 
-    private func releaseStickyModifiers() {
+    func releaseStickyModifiers() {
         for mod in heldStickyModifiers {
             emitter.releaseModifier(mod)
         }

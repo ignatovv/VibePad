@@ -124,6 +124,7 @@ final class KeyboardEmitter {
     func holdModifier(_ modifier: String) {
         guard let keyCode = Self.modifierKeyCodes[modifier] else { return }
         guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else { return }
+        event.type = .flagsChanged
         event.flags = Self.modifierFlags(from: [modifier])
         event.post(tap: .cghidEventTap)
     }
@@ -131,7 +132,18 @@ final class KeyboardEmitter {
     func releaseModifier(_ modifier: String) {
         guard let keyCode = Self.modifierKeyCodes[modifier] else { return }
         guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false) else { return }
+        event.type = .flagsChanged
+        event.flags = []
         event.post(tap: .cghidEventTap)
+    }
+
+    func releaseAllModifiers() {
+        for (_, keyCode) in Self.modifierKeyCodes {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false) else { continue }
+            event.type = .flagsChanged
+            event.flags = []
+            event.post(tap: .cghidEventTap)
+        }
     }
 
     // MARK: - Key down / up (for held keys like arrows)

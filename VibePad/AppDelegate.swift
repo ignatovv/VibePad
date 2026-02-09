@@ -14,7 +14,11 @@ import Sparkle
 @Observable
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var isEnabled = true
+    var isEnabled = true {
+        didSet {
+            if !isEnabled { inputMapper?.releaseStickyModifiers() }
+        }
+    }
     var isHUDEnabled = true
     var controllerName: String?
     var isAccessibilityGranted = false
@@ -51,6 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var gamepadManager: GamepadManager?
     private var inputMapper: InputMapper?
+    private var emitter: KeyboardEmitter?
     private var hud: OverlayHUD?
     private var voiceShortcutPicker: VoiceShortcutPicker?
     private var onboardingWizard: OnboardingWizard?
@@ -90,6 +95,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let emitter = KeyboardEmitter()
+        self.emitter = emitter
 
         // Detect voice app only on first launch (no config yet)
         let detectedVoiceApp = config == nil ? VoiceAppDetector.detect() : nil
@@ -181,6 +187,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        manager.onDisconnect = { [weak mapper] in
+            mapper?.releaseStickyModifiers()
+        }
+
         manager.startMonitoring()
 
         self.inputMapper = mapper
@@ -193,6 +203,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.isAccessibilityGranted = AccessibilityHelper.isTrusted
             self.launchAtLogin = SMAppService.mainApp.status == .enabled
         }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        emitter?.releaseAllModifiers()
     }
 
     func setHUDEnabled(_ enabled: Bool) {

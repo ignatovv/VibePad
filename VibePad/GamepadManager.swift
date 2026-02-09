@@ -21,6 +21,7 @@ final class GamepadManager {
     var onButtonPressed: ((GamepadButton, Bool) -> Void)?
     var onLeftStick: ((Float, Float) -> Void)?
     var onRightStick: ((Float, Float) -> Void)?
+    var onDisconnect: (() -> Void)?
 
     // MARK: - State
 
@@ -95,6 +96,7 @@ final class GamepadManager {
         pollTimer = nil
         controller = nil
         connectedControllerName = nil
+        onDisconnect?()
     }
 
     // MARK: - Controller setup

@@ -215,6 +215,10 @@ Defaults match macOS key repeat feel. Releasing the button or releasing L1 (for 
 
 By default, only L1+Circle (Delete) has repeat enabled.
 
+### Modifier Lifecycle & Stuck Keys
+
+Sticky modifiers (e.g., Cmd held during app switching) require careful lifecycle management to prevent stuck keys. Multiple safety nets release modifiers on L1 release, controller disconnect, disable toggle, and app termination. See **[Keyboard Injection & Modifier Lifecycle](Keyboard%20Injection%20%26%20Modifier%20Lifecycle.md)** for the full technical reference.
+
 ### App Lifecycle
 
 - Menu bar only (set `LSUIElement = true` in Info.plist)
