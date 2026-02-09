@@ -9,33 +9,38 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ignatovv/VibePad/releases/latest"><img src="https://img.shields.io/github/v/release/ignatovv/VibePad?style=flat-square&label=download&color=blue" alt="Latest Release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple" alt="macOS 14+">
+  <img src="https://img.shields.io/badge/license-PolyForm%20NC-green?style=flat-square" alt="License">
+</p>
+
+<p align="center">
   <img src="assets/hero.gif" alt="VibePad demo — controlling Claude Code with a DualSense gamepad" width="720">
 </p>
 
-Lean back, grab your PS5 controller, and ship code. VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development in Cursor, VS Code, and terminal.
+VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development with Claude Code, Cursor, and VS Code.
 
 Accept AI suggestions, scroll through code, switch apps, dictate with voice — all without touching your keyboard.
 
 ## How It Works
 
 1. Connect your PS5, Xbox, or MFi controller
-2. VibePad maps buttons to keyboard shortcuts optimized for Cursor / VS Code
+2. VibePad maps buttons to keyboard shortcuts optimized for Claude Code, Cursor, and VS Code
 3. Accept AI suggestions, navigate code, switch tabs — all from your controller
 
 ## Features
 
 - **Two-layer mapping** — default layer + L1 modifier layer doubles your button count
-- **Smart Paste** — clipboard-aware: sends Ctrl+V for images (Claude Code terminal), Cmd+V for text
-- **Left stick = arrow keys** — with hysteresis thresholds and hold-to-repeat
-- **Right stick = scroll** — continuous smooth scrolling in any direction
-- **L1+left stick = app switch** — flick right for next app, left for previous
-- **L1+right stick = mouse cursor** — move the pointer without leaving the couch
+- **Smart Paste** — clipboard-aware: Ctrl+V for images, Cmd+V for text
+- **Left stick = arrow keys** — hysteresis thresholds and hold-to-repeat
+- **Right stick = scroll** — continuous smooth scrolling
+- **L1+stick = app switch & mouse** — switch apps or move the cursor without leaving the couch
+- **Mouse clicks** — L3/R3 for left/right click
 - **Hold-to-repeat** — configurable per-button repeat delay and interval
 - **Trigger modes** — fire on press, release, or both (e.g. hold-to-talk for voice input)
-- **Sticky modifiers** — L1+D-pad app switching holds Cmd across multiple presses
-- **HUD overlay** — learning mode shows action labels on every button press
+- **HUD overlay** — shows action labels on every button press
 - **JSON config** — full customization at `~/.vibepad/config.json`
-- **Menu bar app** — status icon, enable/disable toggle, launch at login
+- **Menu bar app** — lives in your status bar, launch at login
 
 ## Install
 
@@ -76,6 +81,7 @@ VibePad writes its default config to `~/.vibepad/config.json` on first launch. E
 - **`keystroke`** — press a key with optional modifiers. `key` is any key name from the [key list](#available-keys), `modifiers` is an array of `"command"`, `"control"`, `"shift"`, `"option"`.
 - **`typeText`** — type a string character by character. Use `\n` for Enter.
 - **`smartPaste`** — clipboard-aware paste: sends Ctrl+V when the clipboard contains an image, Cmd+V otherwise. No `key` or `modifiers` needed.
+- **`leftMouseClick`** / **`rightMouseClick`** — simulate a mouse click at the current cursor position.
 
 ### Available buttons
 
@@ -101,11 +107,7 @@ Letters (`a`-`z`), numbers (`0`-`9`), `return`, `escape`, `space`, `tab`, `delet
 - PS5 DualSense, Xbox, or MFi controller
 - Accessibility permission (for keyboard injection)
 
-## Tech Stack
-
-- Swift 5.9, AppKit
-- GameController framework
-- CGEvent for keyboard injection
+Built with Swift, AppKit, GameController framework, and CGEvent.
 
 ## Acknowledgments
 
