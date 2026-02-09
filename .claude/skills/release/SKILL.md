@@ -106,5 +106,5 @@ gh release create v${VERSION} "/Users/vyuignatiov/code/VibePad/VibePad-${VERSION
    - The version and build number
    - The `sparkle:edSignature` and `length` values (they'll need these for the appcast)
    - The GitHub Release URL
-   - Remind them to run `/appcast` next to update the auto-update feed
+   - Remind them to run `/update-site` next to update the website and auto-update feed
    - **Security reminder**: Ask the user to revoke the temporary permissions they granted in step 1: go to System Settings → Privacy & Security and disable **Automation → Finder** and **Full Disk Access** for their terminal app. These are only needed during the release process and should not stay enabled.
