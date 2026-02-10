@@ -25,9 +25,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var menuBarIcon: String {
         if !isAccessibilityGranted {
-            return "menubar-alert"
-        } else if controllerName == nil {
             return "menubar-disconnected"
+        } else if controllerName == nil {
+            return "menubar-sleeping"
         } else if !isEnabled {
             return "menubar-sleeping"
         } else {
