@@ -19,14 +19,14 @@
   <img src="assets/hero.gif" alt="VibePad demo — controlling Claude Code with a DualSense gamepad" width="720">
 </p>
 
-VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development with Claude Code, Cursor, and VS Code.
+VibePad is a macOS menu bar app that turns your gamepad into a full coding controller — optimized for AI-assisted development with Claude Code and Codex CLI.
 
 Accept AI suggestions, scroll through code, switch apps, dictate with voice — all without touching your keyboard.
 
 ## How It Works
 
 1. Connect your PS5, Xbox, or MFi controller
-2. VibePad maps buttons to keyboard shortcuts optimized for Claude Code, Cursor, and VS Code
+2. VibePad maps buttons to keyboard shortcuts optimized for Claude Code and Codex CLI
 3. Accept AI suggestions, navigate code, switch tabs — all from your controller
 
 ## Features

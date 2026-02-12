@@ -41,7 +41,7 @@ case " ": postKeystroke(key: "space")
 
 | # | Assumption | Rationale |
 |---|-----------|-----------|
-| A1 | Target app is **terminal** running Claude Code | Not Cursor/VS Code — mappings are CLI-first |
+| A1 | Target app is **terminal** running Claude Code or Codex CLI | Mappings are CLI-first |
 | A2 | L1 is a **pure modifier** — no action on tap | Doubles mapping surface without wasting a button |
 | A3 | L1 layer falls through to base if no override | L1+R2 still sends Enter — no dead buttons when holding L1 |
 | A4 | `typeText` sends keystrokes, not Unicode events | Works in any app, matches how a keyboard types |

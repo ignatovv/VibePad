@@ -1,7 +1,7 @@
 # VibePad — Ship code from your couch
 
 ## Overview
-VibePad is a macOS menu bar app that lets you control your AI coding assistant with a gamepad. Maps controller inputs to keyboard shortcuts for Cursor, VS Code, and terminal. Uses GameController framework for input and CGEvent for keyboard injection.
+VibePad is a macOS menu bar app that lets you control your AI coding assistant with a gamepad. Maps controller inputs to keyboard shortcuts for Claude Code and Codex CLI. Uses GameController framework for input and CGEvent for keyboard injection.
 
 ## CRITICAL RULES
 1. **NEVER commit/stage without explicit user request**

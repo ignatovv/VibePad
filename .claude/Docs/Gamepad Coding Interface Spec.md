@@ -4,9 +4,9 @@
 
 ## Overview
 
-VibePad is a lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts optimized for AI-assisted development in VS Code, Cursor, and terminal. It uses Apple's GameController framework for native PS5/Xbox controller support and CGEvent for keyboard injection.
+VibePad is a lightweight macOS menu bar app that maps gamepad inputs to keyboard shortcuts optimized for AI-assisted development with Claude Code and Codex CLI. It uses Apple's GameController framework for native PS5/Xbox controller support and CGEvent for keyboard injection.
 
-**Target audience:** Developers who use AI coding tools (Cursor, Copilot, Claude Code).
+**Target audience:** Developers who use AI coding tools (Claude Code, Codex CLI).
 **Primary goal:** Fun viral project + portfolio showcase for macOS/Swift skills.
 
 ---
@@ -54,13 +54,13 @@ VibePad (macOS menu bar app)
 
 ### 2. Default "Vibe Mode" Mapping
 
-Ship ONE opinionated preset optimized for Cursor/VS Code + terminal:
+Ship ONE opinionated preset optimized for Claude Code + Codex CLI:
 
 | Button | Action | Shortcut | Rationale |
 |--------|--------|----------|-----------|
 | **X / A** | Accept/Confirm | `Return` | Accept AI suggestion |
 | **O / B** | Cancel/Dismiss | `Escape` | Dismiss suggestion |
-| **△ / Y** | AI Chat | `Cmd+L` | Open Cursor AI chat |
+| **△ / Y** | Paste | `Cmd+V` | Paste from clipboard |
 | **□ / X** | Save | `Cmd+S` | Quick save |
 | **D-pad Up** | Line Up | `↑` | Navigate code |
 | **D-pad Down** | Line Down | `↓` | Navigate code |
@@ -150,7 +150,7 @@ Located at `~/.vibepad/config.json`. Created with defaults on first launch.
 4. Implement `KeyboardEmitter` using CGEvent
 5. Wire up: button press → mapped keystroke → CGEvent injection
 6. Request Accessibility permissions with user prompt
-7. Test with a PS5 or Xbox controller in VS Code
+7. Test with a PS5 or Xbox controller in terminal
 
 **Milestone:** Press X on controller → types Return in any app.
 
@@ -242,7 +242,7 @@ Sticky modifiers (e.g., Cmd held during app switching) require careful lifecycle
 
 ## Viral Launch Strategy
 
-1. **Demo video** (30-60s): Split screen — left shows hands on PS5 controller, right shows Cursor accepting suggestions and shipping code. Caption: "I shipped a feature using a PS5 controller"
-2. **Post on:** Twitter/X, Reddit (r/programming, r/cursor, r/vscode), Hacker News
+1. **Demo video** (30-60s): Split screen — left shows hands on PS5 controller, right shows Claude Code accepting suggestions and shipping code. Caption: "I shipped a feature using a PS5 controller"
+2. **Post on:** Twitter/X, Reddit (r/programming, r/claudeai), Hacker News
 3. **README** with high-quality GIF at the top, clear install instructions, and the controller mapping visual
 4. **Hashtag:** #VibePad
