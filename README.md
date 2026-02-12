@@ -9,9 +9,11 @@
 </p>
 
 <p align="center">
+  <a href="https://vibepad.now"><img src="https://img.shields.io/badge/website-vibepad.now-purple?style=flat-square" alt="Website"></a>
   <a href="https://github.com/ignatovv/VibePad/releases/latest"><img src="https://img.shields.io/github/v/release/ignatovv/VibePad?style=flat-square&label=download&color=blue" alt="Latest Release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/license-PolyForm%20NC-green?style=flat-square" alt="License">
+  <a href="https://x.com/VibePadApp"><img src="https://img.shields.io/badge/follow-@VibePadApp-black?style=flat-square&logo=x" alt="Follow on X"></a>
 </p>
 
 <p align="center">
