@@ -114,6 +114,14 @@ Built with Swift, AppKit, GameController framework, and CGEvent.
 
 Inspired by [enjoy2](https://github.com/fyber/enjoy2) — a macOS joystick-to-keyboard mapper.
 
+## Built something with VibePad?
+
+Add the badge to your project README:
+
+```markdown
+[![Built with VibePad](https://img.shields.io/badge/Built_with-VibePad_🎮-blue?style=flat-square)](https://vibepad.now)
+```
+
 ## License
 
 [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) — source available, non-commercial use permitted. See [LICENSE](LICENSE) for details.
