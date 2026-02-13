@@ -16,7 +16,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var isEnabled = true {
         didSet {
-            if !isEnabled { inputMapper?.releaseStickyModifiers() }
+            if !isEnabled {
+                inputMapper?.releaseStickyModifiers()
+                if controllerName != nil {
+                    engagementTracker.recordSessionEnd()
+                    if engagementTracker.shouldShowPrompt() {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                            self?.engagementTracker.showToast()
+                        }
+                    }
+                }
+            }
         }
     }
     var isHUDEnabled = true
@@ -59,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hud: OverlayHUD?
     private var voiceShortcutPicker: VoiceShortcutPicker?
     private var onboardingWizard: OnboardingWizard?
+    private var engagementTracker = EngagementTracker()
     private var statusTimer: Timer?
     private var hasTrackedFirstButton = false
     private var updaterController: SPUStandardUpdaterController?
@@ -187,8 +198,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        manager.onDisconnect = { [weak mapper] in
+        manager.onDisconnect = { [weak self, weak mapper] in
             mapper?.releaseStickyModifiers()
+            guard let self else { return }
+            self.engagementTracker.recordSessionEnd()
+            if self.engagementTracker.shouldShowPrompt() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                    self?.engagementTracker.showToast()
+                }
+            }
         }
 
         manager.startMonitoring()

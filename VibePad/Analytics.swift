@@ -23,6 +23,11 @@ enum Analytics {
     static let voiceAppDetected     = "voiceAppDetected"
     static let appQuit              = "appQuit"
 
+    // Engagement
+    static let engagementPromptShown   = "engagementPromptShown"
+    static let engagementFeedbackTapped = "engagementFeedbackTapped"
+    static let engagementDismissed     = "engagementDismissed"
+
     // MARK: - Lifecycle
 
     static func start() {
