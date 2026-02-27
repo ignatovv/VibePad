@@ -50,8 +50,7 @@ final class EngagementTracker {
             switch action {
             case .feedback:
                 Analytics.send(Analytics.engagementFeedbackTapped)
-                let subject = "VibePad Feedback"
-                let body = """
+                FeedbackHelper.openFeedback(body: """
                 Hey! Thanks for taking a moment.
 
                 1. What's working well for you?
@@ -63,17 +62,7 @@ final class EngagementTracker {
                 3. What feature would make VibePad a must-have?
 
 
-                """
-                var components = URLComponents()
-                components.scheme = "mailto"
-                components.path = "feedback@vibepad.now"
-                components.queryItems = [
-                    URLQueryItem(name: "subject", value: subject),
-                    URLQueryItem(name: "body", value: body),
-                ]
-                if let url = components.url {
-                    NSWorkspace.shared.open(url)
-                }
+                """)
             case .notNow:
                 Analytics.send(Analytics.engagementDismissed, parameters: ["permanent": "false"])
             case .never:
