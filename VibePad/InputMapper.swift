@@ -10,6 +10,7 @@ import Foundation
 enum MappedAction: Equatable {
     case keystroke(key: String, modifiers: [String])
     case stickyKeystroke(key: String, modifiers: [String], stickyModifiers: [String])
+    case modifierTap(modifier: String)
     case typeText(String)
     case smartPaste
     case leftMouseClick
@@ -326,6 +327,8 @@ final class InputMapper {
             }
             // Fire keystroke with combined modifiers (sticky + per-keystroke)
             emitter.postKeystroke(key: key, modifiers: modifiers + stickyModifiers)
+        case .modifierTap(let modifier):
+            emitter.postModifierTap(modifier)
         case .typeText(let text):
             emitter.typeText(text)
         case .smartPaste:

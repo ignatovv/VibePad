@@ -82,10 +82,14 @@ final class OverlayHUD {
     // MARK: - Display helpers
 
     static let modifierSymbols: [String: String] = [
-        "command": "\u{2318}",  // ⌘
-        "shift": "\u{21E7}",   // ⇧
-        "control": "\u{2303}", // ⌃
-        "option": "\u{2325}",  // ⌥
+        "command": "\u{2318}",        // ⌘
+        "shift": "\u{21E7}",         // ⇧
+        "control": "\u{2303}",       // ⌃
+        "option": "\u{2325}",        // ⌥
+        "rightCommand": "R\u{2318}", // R⌘
+        "rightShift": "R\u{21E7}",   // R⇧
+        "rightControl": "R\u{2303}", // R⌃
+        "rightOption": "R\u{2325}",  // R⌥
     ]
 
     static let keyDisplayNames: [String: String] = [
@@ -112,6 +116,8 @@ final class OverlayHUD {
             let allMods = (stickyModifiers + modifiers).map { modifierSymbols[$0] ?? $0 }.joined()
             let keyName = keyDisplayNames[key] ?? key
             return allMods + keyName
+        case .modifierTap(let modifier):
+            return modifierSymbols[modifier] ?? modifier
         case .typeText(let text):
             return text
         case .smartPaste:

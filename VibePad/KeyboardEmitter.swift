@@ -56,10 +56,10 @@ final class KeyboardEmitter {
         var flags = CGEventFlags()
         for mod in modifiers {
             switch mod {
-            case "command":  flags.insert(.maskCommand)
-            case "shift":    flags.insert(.maskShift)
-            case "option":   flags.insert(.maskAlternate)
-            case "control":  flags.insert(.maskControl)
+            case "command", "rightCommand":   flags.insert(.maskCommand)
+            case "shift", "rightShift":       flags.insert(.maskShift)
+            case "option", "rightOption":     flags.insert(.maskAlternate)
+            case "control", "rightControl":   flags.insert(.maskControl)
             default: break
             }
         }
@@ -119,6 +119,7 @@ final class KeyboardEmitter {
 
     static let modifierKeyCodes: [String: CGKeyCode] = [
         "command": 0x37, "shift": 0x38, "option": 0x3A, "control": 0x3B,
+        "rightCommand": 0x36, "rightShift": 0x3C, "rightOption": 0x3D, "rightControl": 0x3E,
     ]
 
     func holdModifier(_ modifier: String) {
@@ -135,6 +136,26 @@ final class KeyboardEmitter {
         event.type = .flagsChanged
         event.flags = []
         event.post(tap: .cghidEventTap)
+    }
+
+    func postModifierTap(_ modifier: String) {
+        guard let keyCode = Self.modifierKeyCodes[modifier] else {
+            print("[VibePad] Unknown modifier: \(modifier)")
+            return
+        }
+        let flags = Self.modifierFlags(from: [modifier])
+
+        guard let down = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true),
+              let up = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)
+        else { return }
+
+        down.type = .flagsChanged
+        down.flags = flags
+        down.post(tap: .cghidEventTap)
+
+        up.type = .flagsChanged
+        up.flags = []
+        up.post(tap: .cghidEventTap)
     }
 
     func releaseAllModifiers() {

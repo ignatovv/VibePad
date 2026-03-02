@@ -17,17 +17,15 @@ final class OnboardingWizard {
         prefilled: MappedAction,
         completion: @escaping (_ voiceAction: MappedAction?, _ voiceLabel: String?, _ launchAtLogin: Bool) -> Void
     ) {
-        let initialKey: String
-        let initialModifiers: [String]
-        if case .keystroke(let key, let modifiers) = prefilled {
-            initialKey = key
-            initialModifiers = modifiers
-        } else {
-            initialKey = "space"
-            initialModifiers = ["option"]
+        let recorder: ShortcutRecorderState
+        switch prefilled {
+        case .keystroke(let key, let modifiers):
+            recorder = ShortcutRecorderState(key: key, modifiers: modifiers)
+        case .modifierTap(let modifier):
+            recorder = ShortcutRecorderState(modifierOnly: modifier)
+        default:
+            recorder = ShortcutRecorderState(key: "space", modifiers: ["option"])
         }
-
-        let recorder = ShortcutRecorderState(key: initialKey, modifiers: initialModifiers)
 
         let view = OnboardingView(
             recorder: recorder,

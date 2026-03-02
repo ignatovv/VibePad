@@ -182,6 +182,10 @@ extension ActionConfig {
             self.init(type: "rightMouseClick", key: nil, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
                       repeats: nil, repeatDelay: nil, repeatInterval: nil,
                       trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
+        case .modifierTap(let modifier):
+            self.init(type: "modifierTap", key: modifier, modifiers: nil, stickyModifiers: nil, text: nil, description: description,
+                      repeats: nil, repeatDelay: nil, repeatInterval: nil,
+                      trigger: triggerMode != .onPress ? triggerMode?.rawValue : nil)
         }
     }
 
@@ -211,6 +215,12 @@ extension ActionConfig {
             return .leftMouseClick
         case "rightMouseClick":
             return .rightMouseClick
+        case "modifierTap":
+            guard let key, KeyboardEmitter.modifierKeyCodes[key] != nil else {
+                print("[VibePad] Config: unknown modifier \"\(key ?? "<nil>")\"")
+                return nil
+            }
+            return .modifierTap(modifier: key)
         default:
             print("[VibePad] Config: unknown action type \"\(type)\"")
             return nil

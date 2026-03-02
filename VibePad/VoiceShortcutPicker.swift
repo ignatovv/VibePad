@@ -13,6 +13,9 @@ final class ShortcutRecorderState {
     var key: String
     var modifiers: [String]  // macOS-standard order
     var isRecording = false
+    var isModifierOnly = false
+    var modifierOnlyName: String?
+    var pendingModifier: String?  // transient, used during recording
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -26,9 +29,18 @@ final class ShortcutRecorderState {
         return map
     }()
 
+    // Reverse map: modifier CGKeyCode → modifier name (left and right)
+    private static let modifierKeyCodeToName: [UInt16: String] = [
+        0x37: "command", 0x38: "shift", 0x3A: "option", 0x3B: "control",
+        0x36: "rightCommand", 0x3C: "rightShift", 0x3D: "rightOption", 0x3E: "rightControl",
+    ]
+
     // macOS-standard modifier order for sorting
     private static let modifierOrder: [String: Int] = [
-        "control": 0, "option": 1, "shift": 2, "command": 3,
+        "control": 0, "rightControl": 1,
+        "option": 2, "rightOption": 3,
+        "shift": 4, "rightShift": 5,
+        "command": 6, "rightCommand": 7,
     ]
 
     init(key: String, modifiers: [String]) {
@@ -36,21 +48,62 @@ final class ShortcutRecorderState {
         self.modifiers = modifiers
     }
 
+    init(modifierOnly modifier: String) {
+        self.key = ""
+        self.modifiers = []
+        self.isModifierOnly = true
+        self.modifierOnlyName = modifier
+    }
+
     var label: String {
         OverlayHUD.label(for: action)
     }
 
     var action: MappedAction {
-        .keystroke(key: key, modifiers: modifiers)
+        if isModifierOnly, let mod = modifierOnlyName {
+            return .modifierTap(modifier: mod)
+        }
+        return .keystroke(key: key, modifiers: modifiers)
     }
 
     func startRecording() {
         stopRecording()
+        pendingModifier = nil
         let selfPtr = Unmanaged.passUnretained(self).toOpaque()
 
-        let callback: CGEventTapCallBack = { _, _, event, userInfo -> Unmanaged<CGEvent>? in
+        let callback: CGEventTapCallBack = { _, type, event, userInfo -> Unmanaged<CGEvent>? in
             guard let userInfo else { return Unmanaged.passUnretained(event) }
             let state = Unmanaged<ShortcutRecorderState>.fromOpaque(userInfo).takeUnretainedValue()
+
+            // Handle modifier-only shortcuts via flagsChanged
+            if type == .flagsChanged {
+                let keyCode = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
+                let flags = event.flags
+                let hasModifier = !flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl]).isEmpty
+
+                if let modName = ShortcutRecorderState.modifierKeyCodeToName[keyCode] {
+                    if hasModifier {
+                        // Modifier pressed — remember it, wait for release
+                        state.pendingModifier = modName
+                    } else if let pending = state.pendingModifier {
+                        // Modifier released with no intervening keyDown → modifier-only shortcut
+                        state.pendingModifier = nil
+                        DispatchQueue.main.async {
+                            state.key = ""
+                            state.modifiers = []
+                            state.isModifierOnly = true
+                            state.modifierOnlyName = pending
+                            state.isRecording = false
+                            state.stopRecording()
+                        }
+                        return nil
+                    }
+                }
+                return Unmanaged.passUnretained(event)
+            }
+
+            // keyDown — clear pending modifier (user pressed modifier+key, not modifier-only)
+            state.pendingModifier = nil
 
             let keyCode = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
             guard let keyName = ShortcutRecorderState.reverseKeyCodeMap[keyCode] else {
@@ -68,6 +121,8 @@ final class ShortcutRecorderState {
             DispatchQueue.main.async {
                 state.key = keyName
                 state.modifiers = mods
+                state.isModifierOnly = false
+                state.modifierOnlyName = nil
                 state.isRecording = false
                 state.stopRecording()
             }
@@ -76,11 +131,15 @@ final class ShortcutRecorderState {
             return nil
         }
 
+        let eventsOfInterest = CGEventMask(
+            (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
+        )
+
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .defaultTap,
-            eventsOfInterest: CGEventMask(1 << CGEventType.keyDown.rawValue),
+            eventsOfInterest: eventsOfInterest,
             callback: callback,
             userInfo: selfPtr
         ) else { return }
@@ -120,17 +179,15 @@ final class VoiceShortcutPicker {
     private var recorder: ShortcutRecorderState?
 
     func show(prefilled: MappedAction, completion: @escaping ((MappedAction, String)?) -> Void) {
-        let initialKey: String
-        let initialModifiers: [String]
-        if case .keystroke(let key, let modifiers) = prefilled {
-            initialKey = key
-            initialModifiers = modifiers
-        } else {
-            initialKey = "space"
-            initialModifiers = ["option"]
+        let recorder: ShortcutRecorderState
+        switch prefilled {
+        case .keystroke(let key, let modifiers):
+            recorder = ShortcutRecorderState(key: key, modifiers: modifiers)
+        case .modifierTap(let modifier):
+            recorder = ShortcutRecorderState(modifierOnly: modifier)
+        default:
+            recorder = ShortcutRecorderState(key: "space", modifiers: ["option"])
         }
-
-        let recorder = ShortcutRecorderState(key: initialKey, modifiers: initialModifiers)
 
         let view = VoiceShortcutPickerView(
             recorder: recorder,
